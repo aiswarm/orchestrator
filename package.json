@@ -15,9 +15,11 @@
   "author": "Ravi Gairola <mallox@pyxzl.net",
   "license": "ISC",
   "dependencies": {
+    "commander": "^11.1.0",
+    "console-log-level": "^1.4.1"
+  },
+  "devDependencies": {
     "ava": "^5.3.1",
-    "c8": "^8.0.1",
-    "chai": "^4.3.10",
-    "commander": "^11.1.0"
+    "c8": "^8.0.1"
   }
 }

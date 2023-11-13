@@ -15,3 +15,11 @@ Next you will have to specify the main file for your plugin. This is the file th
 Finally with this setup, when the application starts it will load your plugin and call the `initialize` function. This is where you can register your plugin with the system. You receive two parameter, the config and an api object that allows you to interact with the system.
 
 The rest is then up to you. To see how you can interact with the system, you can look at the [api documentation](./api.md).
+
+## Type of plugins
+
+Depending on what kind of plugin you want to write, you will have to do different things. There are multiple types of plugins that you can write and each will require you to provide an interface for the system to interact with. All interactions run through the API object that is passed to the initialize function.
+
+### Agent Drivers
+
+Agent drivers are plugins that allow the system to interact with a specific type of agent. This can be a chatbot, a voice assistant, or any other type of agent. The system will load all agent drivers and then use them to interact with the agents that are configured. Each agent will receive a config object that contains the configuration for that agent.  

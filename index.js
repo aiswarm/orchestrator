@@ -4,34 +4,32 @@
  * src/.
  */
 
-import {init} from './src/index.js'
 import { program } from 'commander'
 
+import {init} from './src/index.js'
 /**
  * Parses the arguments to the command line interface and starts the swarm orchestration system.
  * Supports multiple flags e.g. for debugging purposes.
  */
 async function start() {
     program
-        .option('-c, --config <path>', 'Path to the configuration file or directory.')
+        .option('-c, --config <path>', 'Path to the configuration file or directory. Defaults to ./config.')
         .option('-d, --debug', 'Enable debug mode.')
-        .option('-v, --verbose', 'Enable verbose mode.')
+        .option('-v, --verbose', 'Enable verbose mode. Overrides debug mode.')
+        .option('-h, --help', 'Print this help message.')
+        .allowUnknownOption(false)
+        .allowExcessArguments(false)
+        .showHelpAfterError(true)
         .parse(process.argv)
 
     const options = program.opts()
-    const configPath = options.config
-    const debug = options.debug
-    const verbose = options.verbose
+    options.help && program.help()
 
-    if (debug) {
-        console.log('Debug mode enabled.')
-    }
+    let loglevel = 'info'
+    options.debug && (loglevel = 'debug')
+    options.verbose && (loglevel = 'trace')
 
-    if (verbose) {
-        console.log('Verbose mode enabled.')
-    }
-
-    await init(configPath)
+    await init(options.config, loglevel)
 }
 
 await start();

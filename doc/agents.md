@@ -25,6 +25,7 @@ Here's what the json looks like:
       "instruction": "The initial instruction for this agent.",
       "groups": ["admins"],
       "creator": true,
+      "isolate": false,
       "driver": {
         "type": "openai",
         "model": "gpt-4-turbo",
@@ -62,6 +63,7 @@ This is where you define the agents and their properties. The properties are as 
 * `instruction` - This is a set of instruction that will be sent to the agent. If the agent was created by another agent, this instruction will prepend the instruction that was sent to create the agent. If it is an entrypoint, it will be prepended to the instruction to start the system.
 * `groups` - This is a list of groups that the agent belongs to. It's used for communication control purposes. You can mix and match between groups specified here and groups specified in the groups section. The system will merge them together. It's up to you to organize your groups in a way that makes sense.
 * `creator` - This is a boolean that indicates whether the agent is allowed to create other agents. If you don't specify this, it will default to false.
+* `isolate` - This is a boolean that indicates whether the agent should be isolated from the rest of the system. It means that it will not communicate with any other agents and only work in its own context. An isolated agents can not create other agents. If you don't specify this, it will default to false.
 * `driver` - This allows you to fine tune settings for each agent and which driver it uses. The default driver is the openai driver. The properties are as follows:
   * `type` - This is the type of driver to use. The default is `openai`. The only other option is `local`. This is used for testing purposes.
   * `model` - This is the model to use. The default is `gpt-4-turbo`. The only other option is `gpt-3`. This is used for testing purposes.

@@ -4,24 +4,22 @@
  * extended via plugins that are added via npm modules. Any modules tagged with the keyword 'ai_so:plugin' will
  * be loaded and initialized automatically. For more information on plugins, see the documentation in the doc folder.
  */
-
+import logger from 'console-log-level'
 import Config from './config.js';
 import API from './api.js';
 import plugins from './plugins.js';
-import {initialize as agentMan, run} from './agentMan.js';
+import AgentMan from './agentMan.js';
 
-export async function init(configPath) {
-    console.log('init');
+export async function init(configPath, loglevel = 'info') {
+    let log = logger({level: loglevel});
+    log.info('init');
 
     // Load 3rd party plugins
-    const config = await Config(configPath)
-    const api = API('./api.js').config = config;
+    const config = await Config(configPath, loglevel)
+    const api = API(config, loglevel);
     await plugins(api)
 
     // load our plugins
-    const initializers = [agentMan]
-    for (const initializer of initializers) {
-        initializer(api)
-    }
-    run();
+    const agentMan = new AgentMan(api)
+    agentMan.run('Stub Instructions');
 }

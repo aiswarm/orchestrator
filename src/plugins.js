@@ -39,7 +39,8 @@ export default async function loadPlugins(api) {
                 continue;
             }
 
-            const module = await import(pluginPath);
+            const main = path.join(pluginPath, packageInfo.main);
+            const module = await import(main);
             if (typeof module.initialize === 'function') {
                 module.initialize(api);
             } else if (module.default === 'function') {

@@ -13,7 +13,7 @@
   },
   "keywords": [],
   "author": "Ravi Gairola <mallox@pyxzl.net",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "commander": "^11.1.0",
     "console-log-level": "^1.4.1"

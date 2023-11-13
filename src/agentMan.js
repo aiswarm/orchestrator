@@ -35,8 +35,17 @@ export default class AgentMan {
         this.#api.log.info('running agent manager with instructions', instructions);
         for (let agentName in this.#agentsWithEntryPoints) {
             let agent = this.#agentsWithEntryPoints[agentName]
-            agent.instruct(instructions)
+            let response = agent.instruct(instructions)
+            this.#api.log.info('Agent', agentName, 'responded with', response)
         }
+    }
+
+    pause() {
+
+    }
+
+    resume() {
+
     }
 
     getAgent(name) {

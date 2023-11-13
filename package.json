@@ -1,0 +1,23 @@
+{
+  "name": "ai_swarm_orchestrator",
+  "version": "1.0.0",
+  "description": "Organizes a swarm of AI agents to work together",
+  "main": "src/index.js",
+  "type": "module",
+  "bin": {
+    "ai_swarm_orchestrator": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "c8 ava test/*.js -w"
+  },
+  "keywords": [],
+  "author": "Ravi Gairola <mallox@pyxzl.net",
+  "license": "ISC",
+  "dependencies": {
+    "ava": "^5.3.1",
+    "c8": "^8.0.1",
+    "chai": "^4.3.10",
+    "commander": "^11.1.0"
+  }
+}

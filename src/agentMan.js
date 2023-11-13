@@ -12,7 +12,7 @@ export default class AgentMan {
         let agentsConfig = api.config.agents
 
         if (!agentsConfig || Object.keys(agentsConfig).length === 0) {
-            api.log.fatal('No agents configured')
+            api.log.error('No agents configured')
             process.exit(1)
         }
 

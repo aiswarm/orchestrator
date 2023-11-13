@@ -16,13 +16,13 @@ const pluginKeyword = 'ai_so:plugin';
  */
 export default async function loadPlugins(api) {
     if (!fs.existsSync(nodeModulesPath)) {
-        console.error('No node_modules directory found. Please run `npm install` to install dependencies.');
+        api.log.error('No node_modules directory found. Please run `npm install` to install dependencies.');
         process.exit(1);
     }
 
     const files = fs.readdirSync(nodeModulesPath);
     if (files.length === 0) {
-        console.error('No plugins found in node_modules directory.');
+        api.log.error('No plugins found in node_modules directory.');
         process.exit(1);
     }
 
@@ -46,10 +46,10 @@ export default async function loadPlugins(api) {
             } else if (module.default === 'function') {
                 module.default(api);
             } else {
-                console.error(`Plugin ${file} does not have an initialize or default function.`);
+                api.log.error(`Plugin ${file} does not have an initialize or default function.`);
             }
         } catch (e) {
-            console.error(`Error loading plugin ${file}: ${e}`);
+            api.log.error(`Error loading plugin ${file}: ${e}`);
         }
     }
 }

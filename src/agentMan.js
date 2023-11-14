@@ -1,62 +1,69 @@
 import Agent from './agent.js'
 
 export default class AgentMan {
-    #api = null
-    #agents = {}
-    #agentsByDriver = {}
-    #agentsWithEntryPoints = {}
+  #api = null
+  #agents = {}
+  #agentsByDriver = {}
+  #agentsWithEntryPoints = {}
 
-    constructor(api) {
-        this.#api = api
-        api.log.info('initialize agents');
-        let agentsConfig = api.config.agents
+  constructor(api) {
+    this.#api = api
+  }
 
-        if (!agentsConfig || Object.keys(agentsConfig).length === 0) {
-            api.log.error('No agents configured')
-            process.exit(1)
-        }
+  initialize() {
+    let agentsConfig = this.#api.config.agents
 
-        for (let agentName in agentsConfig) {
-            let agentConfig = agentsConfig[agentName]
-            let agent = new Agent(agentName, api.getAgentDriver(agentConfig))
-            api.log.info('Created agent', agentName, '(' + agent.driver.type + ')' )
-            this.#agents[agentName] = agent
-            if (!this.#agentsByDriver[agentConfig.type]) {
-                this.#agentsByDriver[agentConfig.type] = []
-            }
-            this.#agentsByDriver[agentConfig.type].push(agent)
-            if (agentConfig.entrypoint) {
-                this.#agentsWithEntryPoints[agentName] = agent
-            }
-        }
+    if (!agentsConfig || Object.keys(agentsConfig).length === 0) {
+      this.#api.log.error('No agents configured, exiting')
+      process.exit(1)
     }
+    this.#api.log.info('Setting up agents');
 
-    run(instructions) {
-        this.#api.log.info('running agent manager with instructions', instructions);
-        for (let agentName in this.#agentsWithEntryPoints) {
-            let agent = this.#agentsWithEntryPoints[agentName]
-            let response = agent.instruct(instructions)
-            this.#api.log.info('Agent', agentName, 'responded with', response)
-        }
+    for (let agentName in agentsConfig) {
+      let agentConfig = agentsConfig[agentName]
+      let agent = new Agent(agentName, this.#api.getAgentDriver(agentConfig, agentName))
+      this.#api.log.info('Created agent', agentName, '(' + agent.driver.type + ')')
+      this.#agents[agentName] = agent
+      if (!this.#agentsByDriver[agentConfig.type]) {
+        this.#agentsByDriver[agentConfig.type] = []
+      }
+      this.#agentsByDriver[agentConfig.type].push(agent)
+      if (agentConfig.entrypoint) {
+        this.#agentsWithEntryPoints[agentName] = agent
+      }
     }
+  }
 
-    pause() {
-
+  run(instructions) {
+    this.#api.log.info('running agent manager with instructions', instructions);
+    for (let agentName in this.#agentsWithEntryPoints) {
+      let agent = this.#agentsWithEntryPoints[agentName]
+      let response = agent.instruct(instructions)
+      this.#api.log.info('Agent', agentName, 'responded with', response)
     }
+  }
 
-    resume() {
+  pause() {
 
-    }
+  }
 
-    getAgent(name) {
-        return this.#agents[name]
-    }
+  resume() {
 
-    getAgentsByDriver(driverType) {
-        return this.#agentsByDriver[driverType]
-    }
+  }
 
-    getAgentsWithEntryPoints() {
-        return this.#agentsWithEntryPoints
-    }
+  getAgent(name) {
+    return this.#agents[name]
+  }
+
+  getAgents() {
+    return this.#agents
+  }
+
+  getAgentsByDriver(driverType) {
+    return this.#agentsByDriver[driverType]
+  }
+
+  getAgentsWithEntryPoints() {
+    return this.#agentsWithEntryPoints
+  }
 }

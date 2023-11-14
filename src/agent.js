@@ -13,30 +13,29 @@
  * This class handles all agent related tasks. It has access to the driver and can instruct it.
  */
 export default class Agent {
-    #name;
-    #config;
-    #driver;
+  #name;
+  #config;
+  #driver;
 
-    /**
-     *
-     * @param {string} name
-     * @param driver
-     * @param {Driver} driver The driver to use for this agent. At this point it already received its configuration and is ready to use.
-     */
-    constructor(name, driver) {
-        this.#name = name
-        this.#driver = driver
-    }
+  /**
+   * Creates a new agent.
+   * @param {string} name
+   * @param {Driver} driver The driver to use for this agent. At this point it already received its configuration and is ready to use.
+   */
+  constructor(name, driver) {
+    this.#name = name
+    this.#driver = driver
+  }
 
-    get name() {
-        return this.#name
-    }
+  get name() {
+    return this.#name
+  }
 
-    get driver() {
-        return this.#driver
-    }
+  get driver() {
+    return this.#driver
+  }
 
-    async instruct(prompt) {
-        return this.#driver.instruct(prompt)
-    }
+  async instruct(prompt) {
+    return this.#driver.instruct(prompt)
+  }
 }

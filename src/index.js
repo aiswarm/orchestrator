@@ -8,18 +8,22 @@ import logger from 'console-log-level'
 import Config from './config.js';
 import API from './api.js';
 import plugins from './plugins.js';
-import AgentMan from './agentMan.js';
+
+let api;
 
 export async function init(configPath, loglevel = 'info') {
     let log = logger({level: loglevel});
-    log.info('init');
+    log.info('Starting AI Swarm Orchestrator');
 
     // Load 3rd party plugins
     const config = await Config(configPath, loglevel)
-    const api = API(config, loglevel);
+    api = API(config, loglevel);
     await plugins(api)
 
-    // load our plugins
-    const agentMan = new AgentMan(api)
-    agentMan.run('Stub Instructions');
+    // Set up agents
+    api.agentMan.initialize()
+}
+
+export async function run() {
+    api.agentMan.run('Stub Instructions');
 }

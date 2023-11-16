@@ -9,21 +9,21 @@ import Config from './config.js';
 import API from './api.js';
 import plugins from './plugins.js';
 
-let api;
+export async function initialize(configPath, loglevel = 'info') {
+  let log = logger({level: loglevel});
+  log.info('Starting AI Swarm Orchestrator');
 
-export async function init(configPath, loglevel = 'info') {
-    let log = logger({level: loglevel});
-    log.info('Starting AI Swarm Orchestrator');
+  // Load 3rd party plugins
+  const config = await Config(configPath, loglevel)
+  let api = API(config, loglevel);
+  await plugins(api)
 
-    // Load 3rd party plugins
-    const config = await Config(configPath, loglevel)
-    api = API(config, loglevel);
-    await plugins(api)
+  // Set up agents
+  api.agentMan.initialize()
 
-    // Set up agents
-    api.agentMan.initialize()
-}
-
-export async function run() {
-    api.agentMan.run('Stub Instructions');
+  return {
+    run: () => {
+      api.agentMan.run('Stub Instructions');
+    }
+  }
 }

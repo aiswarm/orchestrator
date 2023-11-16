@@ -4,49 +4,52 @@
  * src/.
  */
 
-import { program } from 'commander'
+import {program} from 'commander'
 
-import {init, run} from './src/index.js'
+import {initialize} from './src/index.js'
+
 /**
  * Parses the arguments to the command line interface and starts the swarm orchestration system.
  * Supports multiple flags e.g. for debugging purposes.
  */
 async function start() {
-    program
-        .option('-c, --config <path>', 'Path to the configuration file or directory. Defaults to ./config.')
-        .option('-d, --debug', 'Enable debug mode. Shows more information in the logs.')
-        .option('-v, --verbose', 'Enable verbose mode. Warning: This can get spammy and might leak secrets.')
-        .option('-h, --help', 'Print this help message.')
-        .allowUnknownOption(true)
-        .showHelpAfterError(true)
-        .parse(process.argv)
+  program
+  .option('-c, --config -path-', 'Path to the configuration file or directory. Defaults to ./config.')
+  .option('-d, --debug', 'Enable debug mode. Shows more information in the logs.')
+  .option('-v, --verbose', 'Enable verbose mode. Warning: This can get spammy and might leak secrets.')
+  .option('-h, --help', 'Print this help message.')
+  .allowUnknownOption(true)
+  .showHelpAfterError(true)
+  .parse(process.argv)
 
-    program.addHelpText('after', `
+  program.addHelpText('after', `
 Optional Commands:
   run <instructions>      Run the ai swarm orchestrator with the given initial instruction.
   
 `)
 
-    const options = program.opts()
-    options.help && program.help()
+  const options = program.opts()
+  options.help && program.help()
 
-    let loglevel = 'info'
-    options.debug && (loglevel = 'debug')
-    options.verbose && (loglevel = 'trace')
+  let loglevel = 'info'
+  options.debug && (loglevel = 'debug')
+  options.verbose && (loglevel = 'trace')
 
-    const [command, ...params] = program.args;
-    switch (command) {
-        case undefined:
-            await init(options.config, loglevel)
-            break;
-        case 'run':
-            await init(options.config, loglevel)
-            await run(params.join(' '));
-            break;
-        default:
-            console.error('Unknown command', command);
-            process.exit(1);
-    }
+  const [command, ...params] = program.args;
+  switch (command) {
+    case undefined:
+      await initialize(options.config, loglevel)
+      break;
+    case 'run':
+      await (await initialize(options.config, loglevel)).run(params.join(' '));
+      break;
+    default:
+      console.error('Unknown command', command);
+      process.exit(1);
+  }
 }
 
 await start();
+
+// TODO add communications manager that allows the user to see what problems are being tackled right now, and to let the user give advice to the system.
+// TODO also allow the AI to ask the user for help.

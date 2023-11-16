@@ -5,7 +5,7 @@
 There are two ways to configure agents and their relationships:
 
 * as a single file all in one, or
-* as a directory structure that mimics the structuer of the json
+* as a directory structure that mimics the structure of the json
 
 Note that all properties are optional
 
@@ -14,13 +14,26 @@ Here's what the json looks like:
 ```json
 {
   "global": {
-    "instruction": "This instruction will be prepended to all agents' instructions."
+    "agents": {
+      "instruction": "This instruction will be prepended to all agents' instructions."
+    }
   },
   "groups": {
     "group 1": [
       "agent 1",
       "agent 2"
     ]
+  },
+  "drivers": {
+    "openai": {
+      "apiKey": "your openai api key",
+      "model": "gpt-4-turbo",
+      "temperature": 0.9,
+      "max_tokens": 1000,
+      "flags": {
+        "generate": false
+      }
+    }
   },
   "agents": {
     "<name of agent 1>": {
@@ -34,14 +47,7 @@ Here's what the json looks like:
       "isolate": false,
       "driver": {
         "type": "openai",
-        "model": "gpt-4-turbo",
-        "temperature": 0.9,
-        "max_tokens": 100,
-        "flags": {
-          "browse": true,
-          "generate": true,
-          "analyze": true
-        }
+        "temperature": 0.5
       }
     },
     "<name of agent 2>": {
@@ -58,7 +64,7 @@ Please create an issue if you think that's the case.)
 
 ### Groups
 
-This is for communication control purposes. It let's you reference groups instead of individuals to make it easier to
+This is for communication control purposes. It lets you reference groups instead of individuals to make it easier to
 manage communication.
 
 You can mix and match between groups specified here and groups specified on the agent. The system will merge them
@@ -92,7 +98,7 @@ This is where you define the agents and their properties. The properties are as 
     * `temperature` - This is the temperature to use. The default is `0.9`. This is used for testing purposes.
     * `max_tokens` - This is the maximum number of tokens to use. The default is `100`. This is used for testing
       purposes.
-    * `flags` - This is a set of flags that can be used to control the driver. By default all flags are set to `true`.
+    * `flags` - This is a set of flags that can be used to control the driver. By default, all flags are set to `true`.
       The flags are as follows:
         * `browse` - This is a boolean that indicates whether the driver should open a browser window. The default
           is `true`.

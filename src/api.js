@@ -85,7 +85,13 @@ class API extends EventEmitter {
    * @return {Driver} The driver object.
    */
   getAgentDriver(config, agentName) {
-    return new this.#drivers[config.type](this, config, agentName)
+    try {
+      return new this.#drivers[config.type](this, config, agentName)
+    } catch (e) {
+      this.#log.error(`Could not find initialize agent ${agentName} with type ${config.type}.`)
+      this.#log.error(e)
+      process.exit(1)
+    }
   }
 
   /**

@@ -14,7 +14,6 @@
  */
 export default class Agent {
   #name;
-  #config;
   #driver;
 
   /**
@@ -31,6 +30,10 @@ export default class Agent {
     return this.#name
   }
 
+  /**
+   * Returns the type of the driver instance.
+   * @return {Driver}
+   */
   get driver() {
     return this.#driver
   }

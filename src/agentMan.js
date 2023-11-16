@@ -6,6 +6,9 @@ export default class AgentMan {
   #agentsByDriver = {}
   #agentsWithEntryPoints = {}
 
+  /**
+   * @param {API} api
+   */
   constructor(api) {
     this.#api = api
   }
@@ -19,6 +22,7 @@ export default class AgentMan {
     }
     this.#api.log.info('Setting up agents');
 
+    // Sort agents in different indexes for later lookup
     for (let agentName in agentsConfig) {
       let agentConfig = agentsConfig[agentName]
       let agent = new Agent(agentName, this.#api.getAgentDriver(agentConfig, agentName))
@@ -32,23 +36,34 @@ export default class AgentMan {
         this.#agentsWithEntryPoints[agentName] = agent
       }
     }
+
+    // If no agents have entry points, all agents are entry points
+    if (Object.keys(this.#agentsWithEntryPoints).length === 0) {
+      this.#agentsWithEntryPoints = this.#agents
+    }
   }
 
-  run(instructions) {
-    this.#api.log.info('running agent manager with instructions', instructions);
+  async run(instructions) {
+    this.#api.log.info('Running agent manager with instructions', instructions);
     for (let agentName in this.#agentsWithEntryPoints) {
       let agent = this.#agentsWithEntryPoints[agentName]
       let response = agent.instruct(instructions)
-      this.#api.log.info('Agent', agentName, 'responded with', response)
+      this.#api.log.info('Agent', agentName, 'responded with', await response)
     }
   }
 
   pause() {
-
+    for (let agentName in this.#agents) {
+      let agent = this.#agents[agentName]
+      agent.driver.pause()
+    }
   }
 
   resume() {
-
+    for (let agentName in this.#agents) {
+      let agent = this.#agents[agentName]
+      agent.driver.resume()
+    }
   }
 
   getAgent(name) {

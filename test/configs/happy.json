@@ -1,0 +1,28 @@
+{
+  "drivers": {
+    "openai": {
+      "apiKey": "sk-test"
+    }
+  },
+  "groups": {
+    "pit-crew": [
+      "mechanic",
+      "engineer",
+      "tyre-changer"
+    ]
+  },
+  "agents": {
+    "driver": {
+      "instructions": "Drive the car as fast as possible while maintaining safety"
+    },
+    "mechanic": {
+      "instructions": "Ensure the car is in top mechanical condition"
+    },
+    "engineer": {
+      "instructions": "Monitor car systems and provide feedback to the driver"
+    },
+    "tyre-changer": {
+      "instructions": "Change the tyres as quickly as possible during pit stops"
+    }
+  }
+}

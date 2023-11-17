@@ -30,6 +30,7 @@ import AgentMan from "./agentMan.js";
 class API extends EventEmitter {
   #config
   #log
+  #comms = new EventEmitter()
   #drivers = {}
   #agentMan
 
@@ -71,6 +72,14 @@ class API extends EventEmitter {
   }
 
   /**
+   * This method is used to get the communications object.
+   * @return {module:events.EventEmitter}
+   */
+  get comms() {
+    return this.#comms
+  }
+
+  /**
    * This method is used to get the agent manager instance.
    * @return {AgentMan} The agent manager instance.
    */
@@ -81,14 +90,14 @@ class API extends EventEmitter {
   /**
    * This method is used to get a driver object by name.
    * @param {string} agentName The name of the agent to get the driver for.
-   * @param {DriverConfig} config
+   * @param {AgentConfig} config
    * @return {Driver} The driver object.
    */
   getAgentDriver(config, agentName) {
     try {
-      return new this.#drivers[config.type](this, config, agentName)
+      return new this.#drivers[config.driver.type](this, config, agentName)
     } catch (e) {
-      this.#log.error(`Could not find initialize agent ${agentName} with type ${config.type}.`)
+      this.#log.error(`Could not find initialize agent ${agentName} with type ${config.driver.type}.`)
       this.#log.error(e)
       process.exit(1)
     }

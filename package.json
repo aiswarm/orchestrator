@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node index.js",
-    "test": "c8 ava test/*.js -w"
+    "test": "jest --coverage test/"
   },
   "author": "Ravi Gairola <mallox@pyxzl.net",
   "license": "MIT",
@@ -18,7 +18,9 @@
     "console-log-level": "^1.4.1"
   },
   "devDependencies": {
-    "ava": "^5.3.1",
-    "c8": "^8.0.1"
+    "@babel/core": "^7.23.3",
+    "@babel/preset-env": "^7.23.3",
+    "babel-jest": "^29.7.0",
+    "jest": "^27.0.6"
   }
 }

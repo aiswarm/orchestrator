@@ -27,37 +27,20 @@ import defaultConfig from './config.default.js'
 const defaultPath = path.join(process.cwd(), 'config')
 
 /**
- * Reads the configuration from the file system based on a given path. Depending on whether the path is a file or
- * directory, the configuration is parsed and processed here into a single combined json object.
- *
- * @param {string} configPath The path to the configuration file or directory.
- * @param {string} loglevel The log level to use for logging.
- * @return {object} The configuration object built from the file system or a default configuration if there are errors.
+ * Returns the config after reading, processing, and validating it.
+ * @param {string} configPath
+ * @param {string} loglevel
+ * @return {Promise<Config>}
  */
-export default async function readConfig(configPath, loglevel) {
+export default async function get(configPath, loglevel) {
   const log = logger({level: loglevel})
   configPath = findConfig(configPath, log)
-
-  let config
-  if (fs.existsSync(configPath)) {
-    const stats = fs.statSync(configPath)
-    if (stats.isDirectory()) {
-      config = await readConfigDirectory(configPath)
-    } else if (stats.isFile()) {
-      config = await readConfigFile(configPath)
-    }
-  } else {
-    log.error(`Configuration path ${configPath} does not exist.`)
-    process.exit(1)
-  }
-
-  config = Object.assign({}, defaultConfig, config)
+  let config = await readConfig(configPath, log)
   applyGlobalConfig(config)
   applyDrivers(config)
   applyGroups(config)
   validateConfig(config, log)
-  log.trace('Configuration:', config)
-  return config
+  return config;
 }
 
 /**
@@ -69,7 +52,7 @@ export default async function readConfig(configPath, loglevel) {
  */
 export function findConfig(configPath, log) {
   log.trace('Looking for config with path', configPath)
-  if (!configPath || typeof configPath !== 'string' || configPath.trim().length === 0) {
+  if (typeof configPath !== 'string' || configPath.trim().length === 0) {
     log.debug(`No config path given, using default path ${defaultPath}`)
     configPath = defaultPath
   }
@@ -85,8 +68,32 @@ export function findConfig(configPath, log) {
       return path.resolve(pathWithExtension)
     }
   }
-  log.debug(`No config path given, using default path ${defaultPath}`)
+  log.debug(`No file or directory found at config path, using default path ${defaultPath}`)
   return defaultPath
+}
+
+/**
+ * Reads the configuration from the file system based on a given path. Depending on whether the path is a file or
+ * directory, the configuration is parsed and processed here into a single combined json object.
+ *
+ * @param {string} configPath The path to the configuration file or directory.
+ * @param {Object} log The logger object to use for logging.
+ * @return {Config} The configuration object built from the file system or a default configuration if there are errors.
+ */
+export async function readConfig(configPath, log) {
+  let config
+  if (fs.existsSync(configPath)) {
+    const stats = fs.statSync(configPath)
+    if (stats.isDirectory()) {
+      config = await readConfigDirectory(configPath)
+    } else if (stats.isFile()) {
+      config = await readConfigFile(configPath)
+    }
+  } else {
+    log.error(`Configuration path ${configPath} does not exist.`)
+    throw new Error(`Configuration path ${configPath} does not exist.`)
+  }
+  return deepMerge(defaultConfig, config)
 }
 
 /**
@@ -132,8 +139,7 @@ export async function readConfigFile(configPath) {
 export function applyGlobalConfig(config) {
   if (config.global?.agents) {
     for (let agentName in config.agents) {
-      let agent = config.agents[agentName]
-      agent.driver = Object.assign({}, config.global.agents.driver, agent.driver)
+      config.agents[agentName] = deepMerge(config.global.agents, config.agents[agentName])
     }
   }
 }
@@ -143,12 +149,13 @@ export function applyGlobalConfig(config) {
  * @param {Config} config The configuration object as it was read from the file system.
  */
 export function applyDrivers(config) {
-  if (config.drivers) {
-    for (let agentName in config.agents) {
-      let agent = config.agents[agentName]
-      let driverConfig = config.drivers[agent.type]
+  const {drivers, agents} = config;
+  if (drivers) {
+    for (const agentName in agents) {
+      const agentDriver = agents[agentName].driver;
+      const driverConfig = drivers[agentDriver.type];
       if (driverConfig) {
-        agent.driver = Object.assign({}, driverConfig, agent.driver)
+        agents[agentName].driver = {...driverConfig, ...agentDriver};
       }
     }
   }
@@ -166,7 +173,7 @@ export function applyGroups(config) {
       let group = config.groups[groupName]
       for (let agentName in config.agents) {
         let agent = config.agents[agentName]
-        if (!agent.group) {
+        if (!agent.groups) {
           agent.groups = []
         }
         if (group.includes(agentName)) {
@@ -192,25 +199,43 @@ export function applyGroups(config) {
 }
 
 /**
- * Validates the configuration object and logs warnings and errors. Ends the process if there are fatal errors.
+ * Validates the configuration object and logs warnings and errors. Throws an Error on invalid configuration.
  * @param {Config} config The configuration object to validate.
  * @param {Object} log The logger object to use for logging.
  */
-function validateConfig(config, log) {
+export function validateConfig(config, log) {
   // validate agents
   for (let agentName in config.agents) {
     let agent = config.agents[agentName]
-    if (!agent.type) {
-      log.error(`Agent ${agentName} does not have a type specified.`)
-      process.exit(1)
+    if (!agent.driver.type) {
+      log.error(`Agent ${agentName} does not have a driver type specified.`)
+      log.trace('Config:', config)
+      throw new Error(`Agent ${agentName} does not have a type specified.`)
     }
-    if (!config.drivers[agent.type]) {
-      log.error(`Agent ${agentName} has an unknown type ${agent.type}.`)
-      process.exit(1)
+    if (!config.drivers[agent.driver.type]) {
+      log.error(`Agent ${agentName} has an unknown type ${agent.driver.type}.`)
+      log.trace('Config:', config)
+      throw new Error(`Agent ${agentName} has an unknown type ${agent.type}.`)
     }
   }
   if (Object.keys(config.drivers).length === 0) {
     log.error('No drivers configured.')
-    process.exit(1)
+    log.trace('Config:', config)
+    throw new Error('No drivers configured.')
   }
+}
+
+/**
+ * Merges the source object into the target object recursively.
+ * @param {Object} target The target object to merge into
+ * @param {Object} source The source object to merge from
+ * @return {Object} The target object with the source object merged into it
+ */
+function deepMerge(target, source) {
+  for (const key in source) {
+    if (source[key] instanceof Object && key in target) {
+      Object.assign(source[key], deepMerge(target[key], source[key]));
+    }
+  }
+  return Object.assign(target || {}, source);
 }

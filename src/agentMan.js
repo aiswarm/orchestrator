@@ -14,17 +14,17 @@ export default class AgentMan {
   }
 
   initialize() {
-    let agentsConfig = this.#api.config.agents
+    let agentsMap = this.#api.config.agents
 
-    if (!agentsConfig || Object.keys(agentsConfig).length === 0) {
+    if (!agentsMap || Object.keys(agentsMap).length === 0) {
       this.#api.log.error('No agents configured, exiting')
       process.exit(1)
     }
     this.#api.log.info('Setting up agents');
 
     // Sort agents in different indexes for later lookup
-    for (let agentName in agentsConfig) {
-      let agentConfig = agentsConfig[agentName]
+    for (let agentName in agentsMap) {
+      let agentConfig = agentsMap[agentName]
       let agent = new Agent(agentName, this.#api.getAgentDriver(agentConfig, agentName))
       this.#api.log.info('Created agent', agentName, '(' + agent.driver.type + ')')
       this.#agents[agentName] = agent

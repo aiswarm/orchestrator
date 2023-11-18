@@ -39,6 +39,6 @@ export default class Agent {
   }
 
   async instruct(prompt) {
-    return this.#driver.instruct(prompt)
+    return this.#driver.instruct(this.#name, prompt)
   }
 }

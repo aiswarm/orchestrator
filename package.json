@@ -15,7 +15,8 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^11.1.0",
-    "console-log-level": "^1.4.1"
+    "console-log-level": "^1.4.1",
+    "onall": "^1.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.3",

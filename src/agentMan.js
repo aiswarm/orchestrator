@@ -4,7 +4,7 @@ export default class AgentMan {
   #api = null
   #agents = {}
   #agentsByDriver = {}
-  #agentsWithEntryPoints = {}
+  #agentsWithEntryPoints = []
 
   /**
    * @param {API} api
@@ -25,7 +25,7 @@ export default class AgentMan {
     // Sort agents in different indexes for later lookup
     for (let agentName in agentsMap) {
       let agentConfig = agentsMap[agentName]
-      let agent = new Agent(agentName, this.#api.getAgentDriver(agentConfig, agentName))
+      let agent = new Agent(agentName, this.#api.getAgentDriver(agentConfig))
       this.#api.log.info('Created agent', agentName, '(' + agent.driver.type + ')')
       this.#agents[agentName] = agent
       if (!this.#agentsByDriver[agentConfig.type]) {
@@ -33,22 +33,23 @@ export default class AgentMan {
       }
       this.#agentsByDriver[agentConfig.type].push(agent)
       if (agentConfig.entrypoint) {
-        this.#agentsWithEntryPoints[agentName] = agent
+        this.#agentsWithEntryPoints.push(agent)
       }
     }
 
     // If no agents have entry points, all agents are entry points
-    if (Object.keys(this.#agentsWithEntryPoints).length === 0) {
-      this.#agentsWithEntryPoints = this.#agents
+    if (this.#agentsWithEntryPoints.length === 0) {
+      for (let agentName in this.#agents) {
+        this.#agentsWithEntryPoints.push(this.#agents[agentName])
+      }
     }
   }
 
   async run(instructions) {
     this.#api.log.info('Running agent manager with instructions', instructions);
-    for (let agentName in this.#agentsWithEntryPoints) {
-      let agent = this.#agentsWithEntryPoints[agentName]
+    for (let agent of this.#agentsWithEntryPoints) {
       let response = agent.instruct(instructions)
-      this.#api.log.info('Agent', agentName, 'responded with', await response)
+      this.#api.log.info('Agent', agent.name, 'responded with', await response)
     }
   }
 
@@ -66,18 +67,36 @@ export default class AgentMan {
     }
   }
 
+  /**
+   * Returns the agent with the given name.
+   * @param {string} name The name of the agent to return.
+   * @return {Agent} The agent with the given name.
+   */
   getAgent(name) {
     return this.#agents[name]
   }
 
+  /**
+   * Returns a map of all agents, keyed by their name.
+   * @return {Object.<string, Agent>}
+   */
   getAgents() {
     return this.#agents
   }
 
+  /**
+   * Returns a list of all agents that use the given driver.
+   * @param {string} driverType The type of driver to return agents for.
+   * @return {Agent[]} The agents that use the given driver.
+   */
   getAgentsByDriver(driverType) {
     return this.#agentsByDriver[driverType]
   }
 
+  /**
+   * Returns a map of all agents that have an entry point, keyed by their name.
+   * @return {{}}
+   */
   getAgentsWithEntryPoints() {
     return this.#agentsWithEntryPoints
   }

@@ -1,6 +1,7 @@
 import EventEmitter from 'events'
 
 import logger from 'console-log-level'
+import On from 'onall'
 import AgentMan from "./agentMan.js";
 
 /**
@@ -30,7 +31,7 @@ import AgentMan from "./agentMan.js";
 class API extends EventEmitter {
   #config
   #log
-  #comms = new EventEmitter()
+  #comms = On.getExtendedEmitter(new EventEmitter())
   #drivers = {}
   #agentMan
 
@@ -89,15 +90,14 @@ class API extends EventEmitter {
 
   /**
    * This method is used to get a driver object by name.
-   * @param {string} agentName The name of the agent to get the driver for.
-   * @param {AgentConfig} config
+   * @param {AgentConfig} config The configuration object for the driver.
    * @return {Driver} The driver object.
    */
-  getAgentDriver(config, agentName) {
+  getAgentDriver(config) {
     try {
-      return new this.#drivers[config.driver.type](this, config, agentName)
+      return new this.#drivers[config.driver.type](this, config)
     } catch (e) {
-      this.#log.error(`Could not find initialize agent ${agentName} with type ${config.driver.type}.`)
+      this.#log.error(`Returning driver with type ${config.driver.type}.`)
       this.#log.error(e)
       process.exit(1)
     }

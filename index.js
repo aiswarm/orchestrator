@@ -51,5 +51,4 @@ Optional Commands:
 
 await start();
 
-// TODO add communications manager that allows the user to see what problems are being tackled right now, and to let the user give advice to the system.
 // TODO also allow the AI to ask the user for help.

@@ -1,8 +1,7 @@
-import EventEmitter from 'events'
-
 import logger from 'console-log-level'
-import AgentMan from './agentMan.js'
+import AgentIndex from './agentIndex.js'
 import Communications from './comms.js'
+import On from 'onall'
 
 /**
  * @typedef {Class} Driver
@@ -10,6 +9,7 @@ import Communications from './comms.js'
  * @property {function} constructor The constructor for the driver. It will be passed the configuration object.
  * @property {string} type The type of the driver as unique identifier.\
  * @property {DriverConfig} config The configuration object for this driver.
+ * @property {function} initialize This method is used to initialize the driver.
  * @property {function} instruct This method is used to send a prompt to the driver and return a response asynchronously.
  */
 
@@ -21,14 +21,21 @@ import Communications from './comms.js'
 
 /**
  * @emits {config} Emitted when the configuration is set.
+ * @emits {agentCreated} Emitted when an agent is created.
  * @emits {agentDriverRegistered} Emitted when an agent driver is registered.
+ * @emits {configSet} Emitted when the configuration is set.
+ * @emits {groupCreated} Emitted when a group is created.
  */
-class API extends EventEmitter {
+class API extends On {
+  /** @type {Config} */
   #config
+  /** @type {Object} */
   #log
+  /** @type {Communications} */
   #comms
   #drivers = {}
-  #agentMan
+  /** @type {AgentIndex} */
+  #agents
 
   /**
    * Creates a new API object.
@@ -38,9 +45,9 @@ class API extends EventEmitter {
   constructor(config, loglevel) {
     super()
     this.#config = config
-    this.#log = logger({level: loglevel})
+    this.#log = logger({ level: loglevel })
     this.#comms = new Communications(this)
-    this.#agentMan = new AgentMan(this)
+    this.#agents = new AgentIndex(this)
   }
 
   /**
@@ -57,7 +64,7 @@ class API extends EventEmitter {
    */
   set config(config) {
     this.#config = config
-    this.emit('config', JSON.parse(JSON.stringify(config)))
+    this.emit('configSet', JSON.parse(JSON.stringify(config)))
   }
 
   /**
@@ -78,25 +85,39 @@ class API extends EventEmitter {
 
   /**
    * This method is used to get the agent manager instance.
-   * @return {AgentMan} The agent manager instance.
+   * @return {AgentIndex} The agent manager instance.
    */
-  get agentMan() {
-    return this.#agentMan
+  get agents() {
+    return this.#agents
+  }
+
+  get groups() {
+    return this.#config.groups
   }
 
   /**
-   * This method is used to get a driver object by name.
-   * @param {Agent} agent The agent who will use this driver.
-   * @todo This should probably move to the AgentMan class.
+   * This method is used to create an agent.
+   * @param {string} name The name of the agent.
+   * @param {AgentConfig} config The configuration object for the agent.
+   * @return {Agent} The agent object.
    */
-  getAgentDriver(agent) {
-    const type = agent.config.driver.type
-    try {
-      this.#log.trace(`Returning driver with type ${type}.`)
-      return new this.#drivers[type](this, agent)
-    } catch (e) {
-      throw new Error(`Driver ${type} for agent ${agent.name} not found.`)
+  createAgent(name, config) {
+    const agent = this.#agents.create(name, config)
+    this.emit('agentCreated', agent)
+    return agent
+  }
+
+  /**
+   * This method is used to create a group. If the group already exists, it will be returned.
+   * @param {string} name The name of the group.
+   * @return {string[]} The group array. that holds the names of the agents in the group.
+   */
+  createGroup(name) {
+    if (!this.#config.groups[name]) {
+      this.#config.groups[name] = []
+      this.emit('groupCreated', name)
     }
+    return this.#config.groups[name]
   }
 
   /**
@@ -105,7 +126,7 @@ class API extends EventEmitter {
    * @param {Class} driver
    */
   registerAgentDriver(type, driver) {
-    this.#drivers[type] = driver
+    this.#agents.registerDriver(type, driver)
     this.emit('agentDriverRegistered', type)
   }
 }

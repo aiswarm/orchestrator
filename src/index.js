@@ -5,25 +5,25 @@
  * be loaded and initialized automatically. For more information on plugins, see the documentation in the doc folder.
  */
 import logger from 'console-log-level'
-import Config from './config.js';
-import API from './api.js';
-import plugins from './plugins.js';
+import Config from './config.js'
+import API from './api.js'
+import plugins from './plugins.js'
 
 export async function initialize(configPath, loglevel = 'info') {
-  let log = logger({level: loglevel});
-  log.info('Starting AI Swarm Orchestrator');
+  let log = logger({ level: loglevel })
+  log.info('Starting AI Swarm Orchestrator')
 
   // Load 3rd party plugins
   const config = await Config(configPath, loglevel)
-  let api = API(config, loglevel);
+  let api = API(config, loglevel)
   await plugins(api)
 
   // Set up agents
-  api.agentMan.initialize()
+  api.agents.initialize()
 
   return {
     run: () => {
-      api.agentMan.run('Stub Instructions');
-    }
+      api.agents.run('Stub Instructions')
+    },
   }
 }

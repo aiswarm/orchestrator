@@ -16,7 +16,9 @@ const pluginKeyword = 'ai_so:plugin'
  */
 export default async function loadPlugins(api) {
   if (!fs.existsSync(nodeModulesPath)) {
-    api.log.error('No node_modules directory found. Please run `npm install` to install dependencies.')
+    api.log.error(
+      'No node_modules directory found. Please run `npm install` to install dependencies.'
+    )
     process.exit(1)
   }
 
@@ -26,7 +28,7 @@ export default async function loadPlugins(api) {
     process.exit(1)
   }
 
-  for (let file of files) {
+  for (const file of files) {
     if (file.startsWith('.')) {
       api.log.trace(`Skipping ${file} because it starts with a period.`)
       continue
@@ -34,45 +36,51 @@ export default async function loadPlugins(api) {
     const pluginPath = path.join(nodeModulesPath, file)
     const packageJson = path.join(pluginPath, 'package.json')
     if (!fs.existsSync(packageJson)) {
-      api.log.trace(`Missing package.json in ${pluginPath}. Looking for organization scoped plugins.`)
+      api.log.trace(
+        `Missing package.json in ${pluginPath}. Looking for organization scoped plugins.`
+      )
       const orgFiles = fs.readdirSync(pluginPath)
       if (orgFiles.length === 0) {
         api.log.trace(`No organization scoped plugins found in ${pluginPath}.`)
         continue
       }
-      for (let orgFile of orgFiles) {
+      for (const orgFile of orgFiles) {
         const orgPluginPath = path.join(pluginPath, orgFile)
         const orgPackageJson = path.join(orgPluginPath, 'package.json')
         if (!fs.existsSync(orgPackageJson)) {
           api.log.trace(`Missing package.json in ${orgPluginPath}. Skipping.`)
           continue
         }
-        await initialize(api, orgPackageJson);
+        await initialize(api, orgPackageJson)
       }
       continue
     }
 
-    await initialize(api, packageJson);
+    await initialize(api, packageJson)
   }
 }
 
 async function initialize(api, packageJson) {
   try {
-    const packageInfo = JSON.parse(fs.readFileSync(packageJson, {encoding: 'utf8'}))
+    const packageInfo = JSON.parse(
+      fs.readFileSync(packageJson, { encoding: 'utf8' })
+    )
     if (!packageInfo.keywords?.includes(pluginKeyword)) {
-      api.log.trace(`Skipping ${packageInfo.main} because it does not have the ${pluginKeyword} keyword.`)
+      api.log.trace(
+        `Skipping ${packageInfo.main} because it does not have the ${pluginKeyword} keyword.`
+      )
       return
     }
 
     const main = path.join(path.dirname(packageJson), packageInfo.main)
 
     // ignore deprecation warnings from plugins
-    const originalEmitWarning = process.emitWarning;
+    const originalEmitWarning = process.emitWarning
     process.emitWarning = (warning, type, code) => {
-      code !== 'DEP0040' && originalEmitWarning(warning, type, code);
-    };
+      code !== 'DEP0040' && originalEmitWarning(warning, type, code)
+    }
     const module = await import(main)
-    process.emitWarning = originalEmitWarning;
+    process.emitWarning = originalEmitWarning
 
     if (typeof module.initialize === 'function') {
       module.initialize(api)
@@ -81,7 +89,9 @@ async function initialize(api, packageJson) {
       module.default(api)
       api.log.debug(`Loaded plugin ${packageInfo.name}.`)
     } else {
-      api.log.error(`Plugin ${packageInfo.name} does not have an initialize or default function.`)
+      api.log.error(
+        `Plugin ${packageInfo.name} does not have an initialize or default function.`
+      )
     }
   } catch (e) {
     api.log.error(`Error loading plugin ${packageJson}: ${e}`)

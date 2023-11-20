@@ -4,11 +4,11 @@ import On from 'onall'
  * This is mostly for documentation purposes, and make communication a little easier.
  */
 class Message {
-  static stringType = Symbol('string');
-  static imageType = Symbol('image');
-  static videoType = Symbol('video');
-  static audioType = Symbol('audio');
-  static #id = 1;
+  static stringType = Symbol('string')
+  static imageType = Symbol('image')
+  static videoType = Symbol('video')
+  static audioType = Symbol('audio')
+  static #id = 1
 
   constructor(target, source, content, type = Message.stringType) {
     this.id = Message.#id++
@@ -20,26 +20,11 @@ class Message {
   }
 
   toString() {
-    return (
-      this.timestamp +
-      ' ' +
-      this.source +
-      ' -> ' +
-      this.target +
-      ': ' +
-      this.content
-    )
+    return `Message ${this.id} from ${this.source} to ${this.target} at ${this.timestamp} with content ${this.content} of type ${this.type}`
   }
 
   toObject() {
-    return {
-      id: this.id,
-      type: this.type.toString(),
-      source: this.source,
-      target: this.target,
-      timestamp: this.timestamp,
-      content: this.content,
-    }
+    return Object.assign({}, this)
   }
 }
 
@@ -48,8 +33,8 @@ class Message {
  * This class basically acts as an Event Emitter, but on top of that has a history and a catch-all for messages.
  */
 export default class Communications extends On {
-  static Message = Message;
-  #history = [];
+  static Message = Message
+  #history = []
 
   constructor(api) {
     super()

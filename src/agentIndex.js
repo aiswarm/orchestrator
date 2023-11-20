@@ -1,10 +1,16 @@
 import Agent from './agent.js'
 
-export default class AgentMan {
-  #api = null;
-  #agents = {};
-  #agentsByDriver = {};
-  #agentsWithEntryPoints = [];
+export default class AgentIndex {
+  /** @type {API} */
+  #api = null
+  /** @type {Object.<string, Agent>} */
+  #agents = {}
+  /** @type {Object.<string, Agent[]>}*/
+  #agentsByDriver = {}
+  /** @type {Agent[]} */
+  #agentsWithEntryPoints = []
+  /** @type {Object.<string, Class>} */
+  #drivers = {}
 
   /**
    * @param {API} api
@@ -13,6 +19,9 @@ export default class AgentMan {
     this.#api = api
   }
 
+  /**
+   * Need to initialize after we loaded the plugins, because plugins can register drivers.
+   */
   initialize() {
     let agentsMap = this.#api.config.agents
 
@@ -25,7 +34,7 @@ export default class AgentMan {
     // Sort agents in different indexes for later lookup
     for (let agentName in agentsMap) {
       let agentConfig = agentsMap[agentName]
-      let agent = new Agent(this.#api, agentName, agentConfig)
+      let agent = this.create(agentName, agentConfig)
       this.#api.log.info(
         'Created agent',
         agentName,
@@ -43,7 +52,7 @@ export default class AgentMan {
 
     // If no agents have entry points, all agents are entry points
     if (this.#agentsWithEntryPoints.length === 0) {
-      for (let agentName in this.#agents) {
+      for (let agentName in this.all()) {
         this.#agentsWithEntryPoints.push(this.#agents[agentName])
       }
     }
@@ -51,7 +60,7 @@ export default class AgentMan {
 
   async run(instructions) {
     this.#api.log.info('Running agent manager with instructions', instructions)
-    for (let agent of this.#agentsWithEntryPoints) {
+    for (let agent of this.withEntryPoints()) {
       let response = agent.instruct(instructions)
       this.#api.log.info('Agent', agent.name, 'responded with', await response)
     }
@@ -76,7 +85,7 @@ export default class AgentMan {
    * @param {string} name The name of the agent to return.
    * @return {Agent} The agent with the given name.
    */
-  getAgent(name) {
+  get(name) {
     return this.#agents[name]
   }
 
@@ -84,7 +93,7 @@ export default class AgentMan {
    * Returns a map of all agents, keyed by their name.
    * @return {Object.<string, Agent>}
    */
-  getAgents() {
+  all() {
     return this.#agents
   }
 
@@ -93,7 +102,7 @@ export default class AgentMan {
    * @param {string} driverType The type of driver to return agents for.
    * @return {Agent[]} The agents that use the given driver.
    */
-  getAgentsByDriver(driverType) {
+  byDriver(driverType) {
     return this.#agentsByDriver[driverType]
   }
 
@@ -101,7 +110,43 @@ export default class AgentMan {
    * Returns a map of all agents that have an entry point, keyed by their name.
    * @return {{}}
    */
-  getAgentsWithEntryPoints() {
+  withEntryPoints() {
     return this.#agentsWithEntryPoints
+  }
+
+  /**
+   *  This method is used to create an agent.
+   * @param {string} name The name of the agent to create.
+   * @param {AgentConfig} config The configuration object for the agent.
+   * @return {Agent} The agent object.
+   */
+  create(name, config) {
+    const driver = this.getAgentDriver(name, config.driver)
+    return new Agent(this.#api, name, config, driver)
+  }
+
+  /**
+   * This method is used to register a driver class by type.
+   * @param {string} type The type of the driver to register.
+   * @param {Class} driver
+   */
+  registerDriver(type, driver) {
+    this.#api.log.trace(`Registering driver with type ${type}.`)
+    this.#drivers[type] = driver
+  }
+
+  /**
+   * This method is used to get a driver object by name.
+   *  @param {string} name The name of the agent for which to get the driver.
+   *  @param {DriverConfig} config The configuration object for the driver.
+   */
+  getAgentDriver(name, config) {
+    const type = config.type
+    try {
+      return new this.#drivers[type](this.#api, name, config)
+    } catch (e) {
+      console.log(e)
+      throw new Error(`Driver ${type} for agent ${name} not found.`)
+    }
   }
 }

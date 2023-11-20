@@ -1,13 +1,8 @@
 import EventEmitter from 'events'
 
 import logger from 'console-log-level'
-import On from 'onall'
-import AgentMan from "./agentMan.js";
-
-/**
- * This module is the interface between the swarm orchestration system and any plugins that are loaded.
- * It is an abstraction to allow CLI, web, and other applications to use the same system.
- */
+import AgentMan from './agentMan.js'
+import Communications from './comms.js'
 
 /**
  * @typedef {Class} Driver
@@ -31,7 +26,7 @@ import AgentMan from "./agentMan.js";
 class API extends EventEmitter {
   #config
   #log
-  #comms = On.getExtendedEmitter(new EventEmitter())
+  #comms
   #drivers = {}
   #agentMan
 
@@ -44,6 +39,7 @@ class API extends EventEmitter {
     super()
     this.#config = config
     this.#log = logger({level: loglevel})
+    this.#comms = new Communications(this)
     this.#agentMan = new AgentMan(this)
   }
 
@@ -90,16 +86,16 @@ class API extends EventEmitter {
 
   /**
    * This method is used to get a driver object by name.
-   * @param {AgentConfig} config The configuration object for the driver.
-   * @return {Driver} The driver object.
+   * @param {Agent} agent The agent who will use this driver.
+   * @todo This should probably move to the AgentMan class.
    */
-  getAgentDriver(config) {
+  getAgentDriver(agent) {
+    const type = agent.config.driver.type
     try {
-      return new this.#drivers[config.driver.type](this, config)
+      this.#log.trace(`Returning driver with type ${type}.`)
+      return new this.#drivers[type](this, agent)
     } catch (e) {
-      this.#log.error(`Returning driver with type ${config.driver.type}.`)
-      this.#log.error(e)
-      process.exit(1)
+      throw new Error(`Driver ${type} for agent ${agent.name} not found.`)
     }
   }
 

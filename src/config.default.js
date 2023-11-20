@@ -6,13 +6,16 @@ const config = {
   global: {
     agents: {
       driver: {
-        type: 'openai'
-      }
-    }
+        type: 'openai',
+      },
+    },
+  },
+  comms: {
+    historySize: 1000,
   },
   drivers: {
     openai: {
-      engine: "gpt-4-turbo",
+      engine: 'gpt-4-turbo',
       maxTokens: 1500,
       temperature: 0.9,
       topP: 1,
@@ -23,10 +26,10 @@ const config = {
       flags: {
         browse: true,
         generate: true,
-        analyze: true
-      }
-    }
+        analyze: true,
+      },
+    },
   },
-  agents: {}
+  agents: {},
 }
-export default config;
+export default config

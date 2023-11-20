@@ -1,10 +1,10 @@
 import Agent from './agent.js'
 
 export default class AgentMan {
-  #api = null
-  #agents = {}
-  #agentsByDriver = {}
-  #agentsWithEntryPoints = []
+  #api = null;
+  #agents = {};
+  #agentsByDriver = {};
+  #agentsWithEntryPoints = [];
 
   /**
    * @param {API} api
@@ -20,13 +20,17 @@ export default class AgentMan {
       this.#api.log.error('No agents configured, exiting')
       process.exit(1)
     }
-    this.#api.log.info('Setting up agents');
+    this.#api.log.info('Setting up agents')
 
     // Sort agents in different indexes for later lookup
     for (let agentName in agentsMap) {
       let agentConfig = agentsMap[agentName]
-      let agent = new Agent(agentName, this.#api.getAgentDriver(agentConfig))
-      this.#api.log.info('Created agent', agentName, '(' + agent.driver.type + ')')
+      let agent = new Agent(this.#api, agentName, agentConfig)
+      this.#api.log.info(
+        'Created agent',
+        agentName,
+        '(' + agent.driver.type + ')'
+      )
       this.#agents[agentName] = agent
       if (!this.#agentsByDriver[agentConfig.type]) {
         this.#agentsByDriver[agentConfig.type] = []
@@ -46,7 +50,7 @@ export default class AgentMan {
   }
 
   async run(instructions) {
-    this.#api.log.info('Running agent manager with instructions', instructions);
+    this.#api.log.info('Running agent manager with instructions', instructions)
     for (let agent of this.#agentsWithEntryPoints) {
       let response = agent.instruct(instructions)
       this.#api.log.info('Agent', agent.name, 'responded with', await response)

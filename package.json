@@ -8,20 +8,23 @@
     "ai_swarm_orchestrator": "./index.js"
   },
   "scripts": {
-    "start": "node index.js",
-    "test": "jest --coverage test/"
+    "start": "node index.js run",
+    "test": "jest --coverage test/",
+    "watch": "nodemon index.js run",
+    "link": "npm link plugins/ui-web/ plugins/driver-openai/ plugins/api-graphql/"
   },
   "author": "Ravi Gairola <mallox@pyxzl.net",
   "license": "MIT",
   "dependencies": {
     "commander": "^11.1.0",
     "console-log-level": "^1.4.1",
-    "onall": "^1.1.0"
+    "onall": "^2.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.3",
     "@babel/preset-env": "^7.23.3",
     "babel-jest": "^29.7.0",
-    "jest": "^27.0.6"
+    "jest": "^27.0.6",
+    "nodemon": "^3.0.1"
   }
 }

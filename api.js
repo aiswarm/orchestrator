@@ -1,6 +1,6 @@
 import logger from 'console-log-level'
-import AgentIndex from './agentIndex.js'
-import Communications from './comms.js'
+import AgentIndex from './src/agentIndex.js'
+import Communications from './src/comms.js'
 import On from 'onall'
 
 /**

@@ -6,7 +6,7 @@
  */
 import logger from 'console-log-level'
 import Config from './config.js'
-import API from './api.js'
+import API from '../api.js'
 import plugins from './plugins.js'
 
 export async function initialize(configPath, loglevel = 'info') {

@@ -36,16 +36,8 @@ export default class AgentIndex {
       let agentConfig = agentsMap[agentName]
       let agent = this.create(agentName, agentConfig)
       this.#api.log.info(
-        'Created agent',
-        agentName,
-        '(' + agent.driver.type + ')'
+        `Created agent ${agentName} with driver ${agent.driver.type}`
       )
-      this.#agents[agentName] = agent
-      this.#agentsByDriver[agentConfig.driver.type] ??= []
-      this.#agentsByDriver[agentConfig.driver.type].push(agent)
-      if (agentConfig.entrypoint) {
-        this.#agentsWithEntryPoints.push(agent)
-      }
     }
 
     // If no agents have entry points, all agents are entry points
@@ -119,8 +111,18 @@ export default class AgentIndex {
    * @return {Agent} The agent object.
    */
   create(name, config) {
+    if (this.#agents[name]) {
+      return this.#agents[name]
+    }
     const driver = this.getAgentDriver(name, config.driver)
-    return new Agent(this.#api, name, config, driver)
+    const agent = new Agent(this.#api, name, config, driver)
+    this.#agents[name] = agent
+    this.#agentsByDriver[config.driver.type] ??= []
+    this.#agentsByDriver[config.driver.type].push(agent)
+    if (config.entrypoint) {
+      this.#agentsWithEntryPoints.push(agent)
+    }
+    return agent
   }
 
   /**

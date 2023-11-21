@@ -16,16 +16,14 @@ const pluginKeyword = 'ai_so:plugin'
  */
 export default async function loadPlugins(api) {
   if (!fs.existsSync(nodeModulesPath)) {
-    api.log.error(
+    throw new Error(
       'No node_modules directory found. Please run `npm install` to install dependencies.'
     )
-    process.exit(1)
   }
 
   const files = fs.readdirSync(nodeModulesPath)
   if (files.length === 0) {
-    api.log.error('No plugins found in node_modules directory.')
-    process.exit(1)
+    throw new Error('No plugins found in node_modules directory.')
   }
 
   for (const file of files) {

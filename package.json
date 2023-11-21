@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node index.js run",
-    "test": "jest --coverage test/",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
     "watch": "nodemon index.js -d run",
     "link": "npm link plugins/ui-web/ plugins/driver-openai/ plugins/api-graphql/"
   },

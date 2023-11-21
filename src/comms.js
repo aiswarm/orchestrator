@@ -16,6 +16,22 @@ class Message {
     this.source = source
     this.content = content
     this.timestamp = Date.now()
+    if (typeof type === 'string') {
+      switch (type) {
+      case 'image':
+        type = Message.imageType
+        break
+      case 'video':
+        type = Message.videoType
+        break
+      case 'audio':
+        type = Message.audioType
+        break
+      default:
+        type = Message.stringType
+        break
+      }
+    }
     this.type = type
   }
 
@@ -35,11 +51,12 @@ class Message {
 export default class Communications extends On {
   static Message = Message
   #history = []
+  #interval
 
   constructor(api) {
     super()
 
-    setInterval(() => {
+    this.#interval = setInterval(() => {
       while (this.#history.length > api.config.comms.historySize)
         this.#history.shift()
     }, 1000)
@@ -55,13 +72,16 @@ export default class Communications extends On {
    * @param {string|symbol|Message} event Equal to the target of the message or simply a message object
    * @param  {...any} args The rest of the arguments, equal to the source, content, and type of the message in that order
    * @property {string} args.target - The target of the message.
-   * @param {string} args[1] - The source of the message.
-   * @param {string} args[2] - The content of the message.
-   * @param {Message.stringType} args[3] - The type of the message.
+   * @param {string} args[0] - The source of the message.
+   * @param {string} args[1] - The content of the message.
+   * @param {Message.stringType} args[2] - The type of the message.
+   * @return {boolean} True if the message was sent successfully.
    */
   emit(event, ...args) {
     const message =
-      event instanceof Message ? event : new Message(event, ...args)
+      event instanceof Message
+        ? event
+        : new Message(event, args[0], args[1], args[2])
     this.#history.push(message)
     if (message.target !== 'all') {
       super.emit('all', message)
@@ -79,5 +99,10 @@ export default class Communications extends On {
    */
   createMessage(target, source, content, type = Message.stringType) {
     return new Message(target, source, content, type)
+  }
+
+  destroy() {
+    clearInterval(this.#interval)
+    delete this
   }
 }

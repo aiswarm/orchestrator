@@ -26,8 +26,8 @@ export default class AgentIndex {
     let agentsMap = this.#api.config.agents
 
     if (!agentsMap || Object.keys(agentsMap).length === 0) {
-      this.#api.log.error('No agents configured, exiting')
-      process.exit(1)
+      this.#api.log.error('No agents configured!')
+      throw new Error('No agents configured!')
     }
     this.#api.log.info('Setting up agents')
 
@@ -41,10 +41,8 @@ export default class AgentIndex {
         '(' + agent.driver.type + ')'
       )
       this.#agents[agentName] = agent
-      if (!this.#agentsByDriver[agentConfig.type]) {
-        this.#agentsByDriver[agentConfig.type] = []
-      }
-      this.#agentsByDriver[agentConfig.type].push(agent)
+      this.#agentsByDriver[agentConfig.driver.type] ??= []
+      this.#agentsByDriver[agentConfig.driver.type].push(agent)
       if (agentConfig.entrypoint) {
         this.#agentsWithEntryPoints.push(agent)
       }
@@ -145,7 +143,6 @@ export default class AgentIndex {
     try {
       return new this.#drivers[type](this.#api, name, config)
     } catch (e) {
-      console.log(e)
       throw new Error(`Driver ${type} for agent ${name} not found.`)
     }
   }

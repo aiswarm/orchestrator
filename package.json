@@ -10,8 +10,8 @@
   "scripts": {
     "start": "node index.js run",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
-    "watch": "nodemon index.js --  run -d",
-    "link": "npm link plugins/ui-web/ plugins/driver-openai/ plugins/api-graphql/"
+    "watch": "nodemon index.js --  run \"Starting Instructions\" -d",
+    "link": "npm link plugins/ui-web/ plugins/api-graphql/"
   },
   "author": "Ravi Gairola <mallox@pyxzl.net",
   "license": "MIT",
@@ -22,8 +22,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.23.3",
-    "@babel/preset-env": "^7.23.3",
     "@babel/eslint-parser": "^7.23.3",
+    "@babel/preset-env": "^7.23.3",
     "babel-jest": "^29.7.0",
     "jest": "^29.7.0",
     "nodemon": "^3.0.1"

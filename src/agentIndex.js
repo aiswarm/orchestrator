@@ -49,10 +49,14 @@ export default class AgentIndex {
   }
 
   async run(instructions) {
-    this.#api.log.info('Running agent manager with instructions', instructions)
+    this.#api.log.info('Sending initial instructions', instructions)
     for (let agent of this.withEntryPoints()) {
-      let response = agent.instruct(instructions)
-      this.#api.log.info('Agent', agent.name, 'responded with', await response)
+      const message = this.#api.comms.createMessage(
+        agent.name,
+        'user',
+        instructions
+      )
+      this.#api.comms.emit(message)
     }
   }
 
@@ -98,7 +102,7 @@ export default class AgentIndex {
 
   /**
    * Returns a map of all agents that have an entry point, keyed by their name.
-   * @return {{}}
+   * @return {Agent[]}
    */
   withEntryPoints() {
     return this.#agentsWithEntryPoints

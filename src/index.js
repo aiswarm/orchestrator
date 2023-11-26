@@ -8,6 +8,7 @@ import logger from 'console-log-level'
 import Config from './config.js'
 import API from '../api.js'
 import plugins from './plugins.js'
+import GeneratorDriver from './driver.generator.js'
 
 export async function initialize(configPath, loglevel = 'info') {
   let log = logger({ level: loglevel })
@@ -18,12 +19,15 @@ export async function initialize(configPath, loglevel = 'info') {
   let api = API(config, loglevel)
   await plugins(api)
 
+  // Add built-in driver(s)
+  api.registerAgentDriver('generator', GeneratorDriver)
+
   // Set up agents
   api.agents.initialize()
 
   return {
-    run: () => {
-      api.agents.run('Stub Instructions')
+    run: (prompt) => {
+      api.agents.run(prompt)
     },
   }
 }

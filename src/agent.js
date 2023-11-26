@@ -10,6 +10,8 @@
  * @property {DriverConfig} driver The driver to use for this agent.
  */
 
+import Communications from './comms.js'
+
 /**
  * This class handles all agent related tasks. It has access to the driver and can instruct it. It also handles the communication between the agents and the user.
  */
@@ -31,9 +33,18 @@ export default class Agent {
     this.#name = name
     this.#config = config
     this.#driver = driver
-    api.comms.on(name, (message) => {
-      this.#driver.instruct(message)
-    })
+    if (this.#driver.instruct) {
+      api.comms.on(name, async (message) => {
+        const response = await this.#driver.instruct(message)
+        if (response) {
+          if (response instanceof Communications.Message) {
+            api.comms.emit(response)
+          } else if (response.trim().length) {
+            api.comms.emit(message.source, name, response)
+          }
+        }
+      })
+    }
   }
 
   get name() {

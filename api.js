@@ -11,7 +11,8 @@ import On from 'onall'
  * @property {string} type The type of the driver as unique identifier.\
  * @property {DriverConfig} config The configuration object for this driver.
  * @property {function} initialize This method is used to initialize the driver.
- * @property {function} instruct This method is used to send a prompt to the driver and return a response asynchronously.
+ * @property {function} pause This method is used to pause the driver.
+ * @property {function} resume This method is used to resume the driver.
  */
 
 /**

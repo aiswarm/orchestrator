@@ -1,6 +1,7 @@
 import logger from 'console-log-level'
 import AgentIndex from './src/agentIndex.js'
 import Communications from './src/comms.js'
+import Groups from './src/groups.js'
 import On from 'onall'
 
 /**
@@ -36,6 +37,8 @@ class API extends On {
   #drivers = {}
   /** @type {AgentIndex} */
   #agents
+  /** @type {Groups} */
+  #groups
 
   /**
    * Creates a new API object.
@@ -46,6 +49,7 @@ class API extends On {
     super()
     this.#config = config
     this.#log = logger({ level: loglevel })
+    this.#groups = new Groups(this)
     this.#comms = new Communications(this)
     this.#agents = new AgentIndex(this)
   }
@@ -77,7 +81,7 @@ class API extends On {
 
   /**
    * This method is used to get the communications object.
-   * @return {module:events.EventEmitter}
+   * @return {Communications}
    */
   get comms() {
     return this.#comms
@@ -91,12 +95,16 @@ class API extends On {
     return this.#agents
   }
 
+  /**
+   * This method is used to get the group manager instance.
+   * @return {Groups}
+   */
   get groups() {
-    return this.#config.groups
+    return this.#groups
   }
 
   /**
-   * This method is used to create an agent.
+   * This method is used to add an agent.
    * @param {string} name The name of the agent.
    * @param {AgentConfig} config The configuration object for the agent.
    * @return {Agent} The agent object.
@@ -108,16 +116,16 @@ class API extends On {
   }
 
   /**
-   * This method is used to create a group. If the group already exists, it will be returned.
+   * This method is used to add a group. If the group already exists, it will be returned.
    * @param {string} name The name of the group.
    * @return {string[]} The group array. that holds the names of the agents in the group.
    */
   createGroup(name) {
-    if (!this.#config.groups[name]) {
-      this.#config.groups[name] = []
+    if (this.#groups.add(name)) {
       this.emit('groupCreated', name)
+      return []
     }
-    return this.#config.groups[name]
+    return this.#groups.get(name)
   }
 
   /**

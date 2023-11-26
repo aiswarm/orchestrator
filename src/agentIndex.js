@@ -105,12 +105,15 @@ export default class AgentIndex {
   }
 
   /**
-   *  This method is used to create an agent.
-   * @param {string} name The name of the agent to create.
+   *  This method is used to add an agent.
+   * @param {string} name The name of the agent to add.
    * @param {AgentConfig} config The configuration object for the agent.
    * @return {Agent} The agent object.
    */
   create(name, config) {
+    if (this.#api.groups.get(name)) {
+      throw new Error(`Agent ${name} already exists as a group.`)
+    }
     if (this.#agents[name]) {
       return this.#agents[name]
     }

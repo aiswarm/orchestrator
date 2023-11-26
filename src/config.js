@@ -14,9 +14,8 @@
  * @property {AgentConfig} global.agents The global agent configuration object. Settings here will be applied to all agents.
  * @property {DriverConfig} drivers The driver configuration object. Keys are driver types, values are driver configuration objects.
  * @property {Object.<string, string[]>} groups Groups of agents, keys are group names, values are lists of agent names or types.
- * @property {Object.<string, AgentConfig>} agents Agents to create on startup, keys are agent names, values are agent configuration objects.
+ * @property {Object.<string, AgentConfig>} agents Agents to add on startup, keys are agent names, values are agent configuration objects.
  */
-
 
 import fs from 'fs'
 import path from 'path'
@@ -33,14 +32,14 @@ const defaultPath = path.join(process.cwd(), 'config')
  * @return {Promise<Config>}
  */
 export default async function get(configPath, loglevel) {
-  const log = logger({level: loglevel})
+  const log = logger({ level: loglevel })
   configPath = findConfig(configPath, log)
   let config = await readConfig(configPath, log)
   applyGlobalConfig(config)
   applyDrivers(config)
   applyGroups(config)
   validateConfig(config, log)
-  return config;
+  return config
 }
 
 /**
@@ -68,7 +67,9 @@ export function findConfig(configPath, log) {
       return path.resolve(pathWithExtension)
     }
   }
-  log.debug(`No file or directory found at config path, using default path ${defaultPath}`)
+  log.debug(
+    `No file or directory found at config path, using default path ${defaultPath}`
+  )
   return defaultPath
 }
 
@@ -124,12 +125,11 @@ export async function readConfigDirectory(configPath) {
  */
 export async function readConfigFile(configPath) {
   if (configPath.endsWith('.json')) {
-    return JSON.parse(fs.readFileSync(configPath, {encoding: 'utf8'}))
+    return JSON.parse(fs.readFileSync(configPath, { encoding: 'utf8' }))
   }
   const module = await import(configPath)
   return module.default || module
 }
-
 
 /**
  * Applies the global driver configuration to all agents.
@@ -139,7 +139,10 @@ export async function readConfigFile(configPath) {
 export function applyGlobalConfig(config) {
   if (config.global?.agents) {
     for (let agentName in config.agents) {
-      config.agents[agentName] = deepMerge(config.global.agents, config.agents[agentName])
+      config.agents[agentName] = deepMerge(
+        config.global.agents,
+        config.agents[agentName]
+      )
     }
   }
 }
@@ -149,13 +152,13 @@ export function applyGlobalConfig(config) {
  * @param {Config} config The configuration object as it was read from the file system.
  */
 export function applyDrivers(config) {
-  const {drivers, agents} = config;
+  const { drivers, agents } = config
   if (drivers) {
     for (const agentName in agents) {
-      const agentDriver = agents[agentName].driver;
-      const driverConfig = drivers[agentDriver.type];
+      const agentDriver = agents[agentName].driver
+      const driverConfig = drivers[agentDriver.type]
       if (driverConfig) {
-        agents[agentName].driver = {...driverConfig, ...agentDriver};
+        agents[agentName].driver = { ...driverConfig, ...agentDriver }
       }
     }
   }
@@ -234,8 +237,8 @@ export function validateConfig(config, log) {
 function deepMerge(target, source) {
   for (const key in source) {
     if (source[key] instanceof Object && key in target) {
-      Object.assign(source[key], deepMerge(target[key], source[key]));
+      Object.assign(source[key], deepMerge(target[key], source[key]))
     }
   }
-  return Object.assign(target || {}, source);
+  return Object.assign(target || {}, source)
 }

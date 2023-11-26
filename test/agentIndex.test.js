@@ -41,7 +41,7 @@ describe('AgentIndex', () => {
     agentIndex.registerDriver('driver1', Driver)
   })
 
-  it('should create an instance of AgentIndex', () => {
+  it('should add an instance of AgentIndex', () => {
     expect(agentIndex).toBeInstanceOf(AgentIndex)
   })
 
@@ -66,7 +66,7 @@ describe('AgentIndex', () => {
     expect(agentIndex.withEntryPoints()).toEqual([expect.any(Agent)])
   })
 
-  it('should create an agent correctly', () => {
+  it('should add an agent correctly', () => {
     agentIndex.registerDriver('driver1', Driver)
 
     const agent = agentIndex.create('agent1', { driver: { type: 'driver1' } })

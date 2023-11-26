@@ -11,7 +11,12 @@ const config = {
     },
   },
   comms: {
-    historySize: 1000,
+    history: {
+      limits: {
+        all: 100_000,
+        individual: 10_000,
+      },
+    },
   },
   drivers: {
     openai: {

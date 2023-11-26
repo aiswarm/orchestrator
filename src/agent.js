@@ -4,7 +4,7 @@
  * @property {string} type The type of the agent as unique identifier.
  * @property {string} description The job description of this agent.
  * @property {boolean} entrypoint Whether this agent is an entry point or not.
- * @property {boolean} creator Whether this agent can create other agents or not.
+ * @property {boolean} creator Whether this agent can add other agents or not.
  * @todo {boolean} creatable Whether this agent can be created by other agents or not.
  * @property {boolean} isolate Whether this agent should be isolated from other agents or not. Set's creator to false.
  * @property {DriverConfig} driver The driver to use for this agent.
@@ -54,5 +54,13 @@ export default class Agent {
 
   async instruct(prompt) {
     return this.#driver.instruct(this.#name, prompt)
+  }
+
+  play() {
+    this.#driver.play()
+  }
+
+  pause() {
+    this.#driver.pause()
   }
 }

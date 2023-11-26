@@ -6,12 +6,12 @@ plugin system is the primary way that this is accomplished.
 If you want to write a plugin, you can find the documentation for that right [here](./plugins.md). Most components of
 the system are already written as plugins and are intended to be replaced by better versions eventually.
 
-You can create your own projects and publish your own modules without having to fork the project. You can even publish
+You can add your own projects and publish your own modules without having to fork the project. You can even publish
 your own version of the system with your own plugins and modules.
 
 ## Getting Started
 
-To create a plugin for this system, you need to create a new npm project and add the keyword 'ai_so:plugin' to the
+To add a plugin for this system, you need to add a new npm project and add the keyword 'ai_so:plugin' to the
 package.json file. This will let the system know that this is a plugin, and it will be loaded automatically.
 
 Next you will have to specify the main file for your plugin. This is the file that will be loaded when the system

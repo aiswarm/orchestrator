@@ -1,7 +1,7 @@
 import On from 'onall'
 
 /**
- * Handles all group interactions.
+ * Handles map group interactions.
  * @emit Groups#created When a group is created.
  * @emit Groups#updated When a group is updated.
  * @emit Groups#removed When a group is removed.
@@ -31,7 +31,7 @@ export default class Groups extends On {
     if (Array.isArray(members[0])) members = members[0]
     if (this.#api.config.groups[name]) {
       this.#api.config.groups[name] = [
-        ...new Set([...this.#api.config.groups[name], ...members]),
+        ...new Set([...this.#api.config.groups[name], ...members])
       ]
       /**
        * @event Groups#updated
@@ -99,7 +99,7 @@ export default class Groups extends On {
    * Returns an object of group names and members.
    * @return {Object.<String,String[]>} An object of group names (keys) and members (array values).
    */
-  all() {
+  map() {
     return this.#api.config.groups
   }
 }

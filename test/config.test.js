@@ -1,22 +1,17 @@
 import path from 'path'
-import {
-  applyDrivers,
-  applyGlobalConfig,
-  applyGroups,
-  findConfig,
-  readConfig,
-  validateConfig,
-} from '../src/config.js'
-import { jest } from '@jest/globals'
+import {applyDrivers, applyGlobalConfig, applyGroups, findConfig, readConfig, validateConfig} from '../src/config.js'
+import {jest} from '@jest/globals'
 
 const logOn = false
-const logFn = logOn ? console.log : () => {}
+// eslint-disable-next-line no-console
+const logFn = logOn ? console.log : () => {
+}
 const log = {
   trace: logFn,
   debug: logFn,
   info: logFn,
   warn: logFn,
-  error: logFn,
+  error: logFn
 }
 
 describe('config.js', () => {
@@ -43,15 +38,15 @@ describe('config.js', () => {
           agents: {
             create: true,
             driver: {
-              type: 'openai',
-            },
-          },
+              type: 'openai'
+            }
+          }
         },
         agents: {
           test: {
-            instructions: 'test',
-          },
-        },
+            instructions: 'test'
+          }
+        }
       }
       applyGlobalConfig(config)
       expect(config.agents.test.create).toBe(true)
@@ -62,17 +57,17 @@ describe('config.js', () => {
       const config = {
         drivers: {
           openai: {
-            apiKey: 'test',
-          },
+            apiKey: 'test'
+          }
         },
         agents: {
           test: {
             instructions: 'test',
             driver: {
-              type: 'openai',
-            },
-          },
-        },
+              type: 'openai'
+            }
+          }
+        }
       }
       applyDrivers(config)
       expect(config.agents.test.driver.apiKey).toBe('test')
@@ -81,14 +76,14 @@ describe('config.js', () => {
     it('applies the groups from the configuration to the agents and vice versa', async () => {
       const config = {
         groups: {
-          group1: ['test'],
+          group1: ['test']
         },
         agents: {
           test: {
             instructions: 'test',
-            groups: ['group2'],
-          },
-        },
+            groups: ['group2']
+          }
+        }
       }
       applyGroups(config)
       expect(config.agents.test.groups).toContain('group1')
@@ -99,17 +94,17 @@ describe('config.js', () => {
       const config = {
         drivers: {
           openai: {
-            apiKey: 'test',
-          },
+            apiKey: 'test'
+          }
         },
         agents: {
           test: {
             instructions: 'test',
             driver: {
-              type: 'openai',
-            },
-          },
-        },
+              type: 'openai'
+            }
+          }
+        }
       }
       validateConfig(config, log)
     })

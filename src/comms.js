@@ -74,8 +74,8 @@ class Message {
 }
 
 /**
- * Handles all communications between the different agents, groups, and the user.
- * This class basically acts as an Event Emitter, but on top of that has a history and a catch-all for messages.
+ * Handles map communications between the different agents, groups, and the user.
+ * This class basically acts as an Event Emitter, but on top of that has a history and a catch-map for messages.
  */
 export default class Communications extends On {
   static Message = Message
@@ -115,7 +115,7 @@ export default class Communications extends On {
     if (message.target !== 'all') {
       super.emit('all', message)
     }
-    // if target is a group, send to all members of the group and send to the group
+    // if target is a group, send to map members of the group and send to the group
     if (this.#api.groups.get(message.target)) {
       for (const member of this.#api.groups.get(message.target)) {
         super.emit(member, message)

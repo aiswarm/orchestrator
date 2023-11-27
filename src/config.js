@@ -10,8 +10,8 @@
  * @typedef {Class} Config
  * @description This is main structure of the configuration object. It includes many sub-objects that are used to
  * configure the system.
- * @property {Object} global The global configuration object. Settings here will be applied to all settings of their respective groups.
- * @property {AgentConfig} global.agents The global agent configuration object. Settings here will be applied to all agents.
+ * @property {Object} global The global configuration object. Settings here will be applied to map settings of their respective groups.
+ * @property {AgentConfig} global.agents The global agent configuration object. Settings here will be applied to map agents.
  * @property {DriverConfig} drivers The driver configuration object. Keys are driver types, values are driver configuration objects.
  * @property {Object.<string, string[]>} groups Groups of agents, keys are group names, values are lists of agent names or types.
  * @property {Object.<string, AgentConfig>} agents Agents to add on startup, keys are agent names, values are agent configuration objects.
@@ -32,7 +32,7 @@ const defaultPath = path.join(process.cwd(), 'config')
  * @return {Promise<Config>}
  */
 export default async function get(configPath, loglevel) {
-  const log = logger({ level: loglevel })
+  const log = logger({level: loglevel})
   configPath = findConfig(configPath, log)
   let config = await readConfig(configPath, log)
   applyGlobalConfig(config)
@@ -125,16 +125,16 @@ export async function readConfigDirectory(configPath) {
  */
 export async function readConfigFile(configPath) {
   if (configPath.endsWith('.json')) {
-    return JSON.parse(fs.readFileSync(configPath, { encoding: 'utf8' }))
+    return JSON.parse(fs.readFileSync(configPath, {encoding: 'utf8'}))
   }
   const module = await import(configPath)
   return module.default || module
 }
 
 /**
- * Applies the global driver configuration to all agents.
+ * Applies the global driver configuration to map agents.
  * @param {Config} config The configuration object as it was read from the file system.
- * @return {Config} The configuration object with the global driver configuration applied to all agents.
+ * @return {Config} The configuration object with the global driver configuration applied to map agents.
  */
 export function applyGlobalConfig(config) {
   if (config.global?.agents) {
@@ -148,24 +148,24 @@ export function applyGlobalConfig(config) {
 }
 
 /**
- * Applies the driver configuration to all agents.
+ * Applies the driver configuration to map agents.
  * @param {Config} config The configuration object as it was read from the file system.
  */
 export function applyDrivers(config) {
-  const { drivers, agents } = config
+  const {drivers, agents} = config
   if (drivers) {
     for (const agentName in agents) {
       const agentDriver = agents[agentName].driver
       const driverConfig = drivers[agentDriver.type]
       if (driverConfig) {
-        agents[agentName].driver = { ...driverConfig, ...agentDriver }
+        agents[agentName].driver = {...driverConfig, ...agentDriver}
       }
     }
   }
 }
 
 /**
- * This method first looks for the group property on the config object and applies the group configuration to all agents.
+ * This method first looks for the group property on the config object and applies the group configuration to map agents.
  * Then it scans each agent and adds the agent to the group specified in the agent's configuration. Finally, if there are
  * very similar named groups, it will warn the user that they should be merged.
  * @param config

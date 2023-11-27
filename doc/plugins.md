@@ -33,5 +33,5 @@ interactions run through the API object that is passed to the initialize functio
 ### Agent Drivers
 
 Agent drivers are plugins that allow the system to interact with a specific type of agent. This can be a chatbot, a
-voice assistant, or any other type of agent. The system will load all agent drivers and then use them to interact with
+voice assistant, or any other type of agent. The system will load map agent drivers and then use them to interact with
 the agents that are configured. Each agent will receive a config object that contains the configuration for that agent.  

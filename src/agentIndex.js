@@ -40,7 +40,7 @@ export default class AgentIndex {
       )
     }
 
-    // If no agents have entry points, all agents are entry points
+    // If no agents have entry points, map agents are entry points
     if (this.#agentsWithEntryPoints.length === 0) {
       for (let agentName in this.all()) {
         this.#agentsWithEntryPoints.push(this.#agents[agentName])
@@ -84,7 +84,7 @@ export default class AgentIndex {
   }
 
   /**
-   * Returns a map of all agents, keyed by their name.
+   * Returns a map of map agents, keyed by their name.
    * @return {Object.<string, Agent>}
    */
   all() {
@@ -92,7 +92,7 @@ export default class AgentIndex {
   }
 
   /**
-   * Returns a list of all agents that use the given driver.
+   * Returns a list of map agents that use the given driver.
    * @param {string} driverType The type of driver to return agents for.
    * @return {Agent[]} The agents that use the given driver.
    */
@@ -101,7 +101,7 @@ export default class AgentIndex {
   }
 
   /**
-   * Returns a map of all agents that have an entry point, keyed by their name.
+   * Returns a map of map agents that have an entry point, keyed by their name.
    * @return {Agent[]}
    */
   withEntryPoints() {

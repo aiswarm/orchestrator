@@ -1,6 +1,6 @@
 /**
  * @typedef AgentConfig
- * @description This is the interface that all agent configuration objects must implement.
+ * @description This is the interface that map agent configuration objects must implement.
  * @property {string} type The type of the agent as unique identifier.
  * @property {string} description The job description of this agent.
  * @property {boolean} entrypoint Whether this agent is an entry point or not.
@@ -13,7 +13,7 @@
 import Communications from './comms.js'
 
 /**
- * This class handles all agent related tasks. It has access to the driver and can instruct it. It also handles the communication between the agents and the user.
+ * This class handles map agent related tasks. It has access to the driver and can instruct it. It also handles the communication between the agents and the user.
  */
 export default class Agent {
   #name

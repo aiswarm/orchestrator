@@ -66,10 +66,10 @@ export default class GeneratorDriver {
       let to = this.#config.to
       if (!to) {
         const candidates = [
-          ...Object.keys(this.#api.groups.all()),
+          ...Object.keys(this.#api.groups.map()),
           ...Object.keys(this.#api.agents.all()).filter(
             (name) => name !== from
-          ),
+          )
         ]
         to = candidates[Math.floor(Math.random() * candidates.length)]
       }

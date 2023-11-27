@@ -1,5 +1,5 @@
 /**
- * This is the command line interface for the swarm orchestration system. It handles all the command line arguments and
+ * This is the command line interface for the swarm orchestration system. It handles map the command line arguments and
  * interactions back and forth with the user. The actual logic is handled by the API object and the rest of the code in
  * src/.
  */
@@ -35,7 +35,7 @@ async function start() {
     'after',
     ` 
 Optional Commands:
-  run <instructions>      Run the ai swarm orchestrator with the given initial instruction.
+  run <instructions>      Run the AI swarm orchestrator with the given initial instruction.
   
 `
   )

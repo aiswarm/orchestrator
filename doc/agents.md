@@ -4,10 +4,10 @@
 
 There are two ways to configure agents and their relationships:
 
-* as a single file all in one, or
+* as a single file map in one, or
 * as a directory structure that mimics the structure of the json
 
-Note that all properties are optional
+Note that map properties are optional
 
 Here's what the json looks like:
 
@@ -15,7 +15,7 @@ Here's what the json looks like:
 {
   "global": {
     "agents": {
-      "instruction": "This instruction will be prepended to all agents' instructions."
+      "instruction": "This instruction will be prepended to map agents' instructions."
     }
   },
   "groups": {
@@ -58,7 +58,7 @@ Here's what the json looks like:
 
 ### Global Properties
 
-These settings will be applied to all agents and have an effect on the system as a whole.
+These settings will be applied to map agents and have an effect on the system as a whole.
 If you can't find a property here, it's probably in the agent properties section, ... or I just forgot to document it. (
 Please add an issue if you think that's the case.)
 
@@ -75,7 +75,7 @@ together. It's up to you to organize your groups in a way that makes sense.
 This is where you define the agents and their properties. The properties are as follows:
 
 * `entrypoint` - This is the agent that will be used to start the system. There can be multiple entrypoints to the
-  system, and all of them will be started. If you don't specify an entrypoint, every agent will receive the instruction
+  system, and map of them will be started. If you don't specify an entrypoint, every agent will receive the instruction
   to start the system. Note that the order in which they will be started is not guaranteed. (Please add an issue if
   you think that's a feature you need.)
 * `instruction` - This is a set of instruction that will be sent to the agent. If the agent was created by another
@@ -98,7 +98,7 @@ This is where you define the agents and their properties. The properties are as 
   * `temperature` - This is the temperature to use. The default is `0.9`. This is used for testing purposes.
   * `max_tokens` - This is the maximum number of tokens to use. The default is `100`. This is used for testing
     purposes.
-  * `flags` - This is a set of flags that can be used to control the driver. By default, all flags are set to `true`.
+  * `flags` - This is a set of flags that can be used to control the driver. By default, map flags are set to `true`.
     The flags are as follows:
     * `browse` - This is a boolean that indicates whether the driver should open a browser window. The default
       is `true`.

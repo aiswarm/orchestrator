@@ -6,7 +6,7 @@ import On from 'onall'
 
 /**
  * @typedef {Class} Driver
- * @description This is the interface that all drivers must implement.
+ * @description This is the interface that map drivers must implement.
  * @property {function} constructor The constructor for the driver. It will be passed the configuration object.
  * @property {string} type The type of the driver as unique identifier.\
  * @property {DriverConfig} config The configuration object for this driver.
@@ -17,7 +17,7 @@ import On from 'onall'
 
 /**
  * @typedef {Class} DriverConfig
- * @description This is the interface that all driver configuration objects must implement.
+ * @description This is the interface that map driver configuration objects must implement.
  * @property {string} type The type of the driver as unique identifier.
  */
 
@@ -49,7 +49,7 @@ class API extends On {
   constructor(config, loglevel) {
     super()
     this.#config = config
-    this.#log = logger({ level: loglevel })
+    this.#log = logger({level: loglevel})
     this.#groups = new Groups(this)
     this.#comms = new Communications(this)
     this.#agents = new AgentIndex(this)

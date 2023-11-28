@@ -22,11 +22,11 @@ import On from 'onall'
  */
 
 /**
- * @emits {config} Emitted when the configuration is set.
- * @emits {agentCreated} Emitted when an agent is created.
+ * @emits {config} Emitted when setting the configuration.
+ * @emits {agentCreated} Emitted when creating an agent.
  * @emits {agentDriverRegistered} Emitted when an agent driver is registered.
- * @emits {configSet} Emitted when the configuration is set.
- * @emits {groupCreated} Emitted when a group is created.
+ * @emits {configSet} Emitted when the configuration is set. Watch out for circular references.
+ * @emits {groupCreated} Emitted when creating a group.
  */
 class API extends On {
   /** @type {Config} */

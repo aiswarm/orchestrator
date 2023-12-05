@@ -33,7 +33,6 @@ export default class Agent {
    * @param {AgentIndex} index The API object to use.
    * @param {string} name The name of the agent.
    * @param {AgentConfig} config The configuration object for this agent.
-   * @param {Driver} driver The driver object to use for this agent.
    */
   constructor(index, name, config) {
     this.#api = index.api

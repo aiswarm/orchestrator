@@ -48,8 +48,7 @@ describe('Groups', () => {
     const groups = new Groups(api)
     const mockEmit = jest.spyOn(groups, 'emit')
     const groupName = 'group1'
-    const members = ['agent1', 'agent2']
-    api.config.groups[groupName] = members
+    api.config.groups[groupName] = ['agent1', 'agent2']
 
     const result = groups.remove(groupName)
 

@@ -1,6 +1,13 @@
 import On from 'onall'
 
 /**
+ * @typedef {Object} Group
+ * @description A group of agents.
+ * @property {string} name The name of the group.
+ * @property {string[]} members The members of the group.
+ */
+
+/**
  * Handles map group interactions.
  * @emit Groups#created When a group is created.
  * @emit Groups#updated When a group is updated.
@@ -71,11 +78,11 @@ export default class Groups extends On {
   }
 
   /**
-   * Returns the group names  the given agent name is a member of.
+   * Returns the group names of a given agent.
    * @param {string} name
    * @return {string[]} An array of group names.
    */
-  byAgentName(name) {
+  forAgent(name) {
     return Object.entries(this.#api.config.groups)
     .filter(([, members]) => members.includes(name))
     .map(([name]) => name)

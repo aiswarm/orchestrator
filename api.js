@@ -5,6 +5,21 @@ import Groups from './src/groups.js'
 import On from 'onall'
 
 /**
+ * @typedef {Object} Logger
+ * @property {LogFunction} trace
+ * @property {LogFunction} debug
+ * @property {LogFunction} info
+ * @property {LogFunction} warn
+ * @property {LogFunction} error
+ */
+
+/**
+ * @typedef {function} LogFunction
+ * @param {string} message
+ * @param {...any} args
+ */
+
+/**
  * @typedef {Class} Driver
  * @description This is the interface that map drivers must implement.
  * @property {function} constructor The constructor for the driver. It will be passed the configuration object.
@@ -19,6 +34,8 @@ import On from 'onall'
  * @typedef {Class} DriverConfig
  * @description This is the interface that map driver configuration objects must implement.
  * @property {string} type The type of the driver as unique identifier.
+ * @property {string} [instructions] The initial set of instructions to use for the assistant.
+ * @property {string[]} [skills] The skills assigned to the assistant.
  */
 
 /**
@@ -31,7 +48,7 @@ import On from 'onall'
 class API extends On {
   /** @type {Config} */
   #config
-  /** @type {Object} */
+  /** @type {Logger} */
   #log
   /** @type {Communications} */
   #comms
@@ -40,6 +57,8 @@ class API extends On {
   #agents
   /** @type {Groups} */
   #groups
+  /** @type {boolean} */
+  #running = false
 
   /**
    * Creates a new API object.
@@ -74,7 +93,7 @@ class API extends On {
 
   /**
    * This method is used to get the logger object.
-   * @return {Object} The logger object.
+   * @return {Logger} The logger object.
    */
   get log() {
     return this.#log
@@ -102,6 +121,14 @@ class API extends On {
    */
   get groups() {
     return this.#groups
+  }
+
+  /**
+   * This method is used to get the running state of the API.
+   * @return {boolean}
+   */
+  get running() {
+    return this.#running
   }
 
   /**
@@ -137,6 +164,16 @@ class API extends On {
   registerAgentDriver(type, driver) {
     this.#agents.registerDriver(type, driver)
     this.emit('agentDriverRegistered', type)
+  }
+
+  pause() {
+    this.#running = false
+    this.emit('paused')
+  }
+
+  resume() {
+    this.#running = true
+    this.emit('resumed')
   }
 }
 

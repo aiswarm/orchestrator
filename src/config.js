@@ -46,7 +46,7 @@ export default async function get(configPath, loglevel) {
  * Check if this directory, file, or a file with a .js or .json extension exists and return a resolved path to it.
  * If no path is given, the default path is returned.
  * @param {string} configPath The path to the configuration file or directory.
- * @param {Object} log The logger object to use for logging.
+ * @param {Logger} log The logger object to use for logging.
  * @return {string} The resolved path to the configuration file or directory.
  */
 export function findConfig(configPath, log) {
@@ -78,7 +78,7 @@ export function findConfig(configPath, log) {
  * directory, the configuration is parsed and processed here into a single combined json object.
  *
  * @param {string} configPath The path to the configuration file or directory.
- * @param {Object} log The logger object to use for logging.
+ * @param {Logger} log The logger object to use for logging.
  * @return {Config} The configuration object built from the file system or a default configuration if there are errors.
  */
 export async function readConfig(configPath, log) {
@@ -134,15 +134,11 @@ export async function readConfigFile(configPath) {
 /**
  * Applies the global driver configuration to map agents.
  * @param {Config} config The configuration object as it was read from the file system.
- * @return {Config} The configuration object with the global driver configuration applied to map agents.
  */
 export function applyGlobalConfig(config) {
   if (config.global?.agents) {
     for (let agentName in config.agents) {
-      config.agents[agentName] = deepMerge(
-        config.global.agents,
-        config.agents[agentName]
-      )
+      config.agents[agentName] = deepMerge(deepMerge({}, config.global.agents), config.agents[agentName])
     }
   }
 }
@@ -168,7 +164,7 @@ export function applyDrivers(config) {
  * This method first looks for the group property on the config object and applies the group configuration to map agents.
  * Then it scans each agent and adds the agent to the group specified in the agent's configuration. Finally, if there are
  * very similar named groups, it will warn the user that they should be merged.
- * @param config
+ * @param {Config} config
  */
 export function applyGroups(config) {
   if (config.groups) {
@@ -204,7 +200,7 @@ export function applyGroups(config) {
 /**
  * Validates the configuration object and logs warnings and errors. Throws an Error on invalid configuration.
  * @param {Config} config The configuration object to validate.
- * @param {Object} log The logger object to use for logging.
+ * @param {Logger} log The logger object to use for logging.
  */
 export function validateConfig(config, log) {
   // validate agents
@@ -230,15 +226,29 @@ export function validateConfig(config, log) {
 
 /**
  * Merges the source object into the target object recursively.
- * @param {Object} target The target object to merge into
- * @param {Object} source The source object to merge from
- * @return {Object} The target object with the source object merged into it
+ * @param {...Object} sources
  */
-function deepMerge(target, source) {
-  for (const key in source) {
-    if (source[key] instanceof Object && key in target) {
-      Object.assign(source[key], deepMerge(target[key], source[key]))
+function deepMerge(...sources) {
+  let target = {}
+  for (const source of sources) {
+    if (source instanceof Array) {
+      if (!(target instanceof Array)) {
+        target = []
+      }
+      target = target.concat(source)
+    } else if (source instanceof Object) {
+      for (const key in source) {
+        if (source[key] instanceof Object) {
+          if (!target[key]) {
+            Object.assign(target, {[key]: {}})
+          }
+          target[key] = deepMerge(target[key], source[key])
+        } else {
+          Object.assign(target, {[key]: source[key]})
+        }
+      }
     }
   }
-  return Object.assign(target || {}, source)
+  return target
+
 }

@@ -21,7 +21,9 @@ describe('AgentIndex', () => {
   beforeEach(() => {
     api = {
       comms: {
-        on: jest.fn()
+        on: jest.fn(),
+        emit: jest.fn(),
+        createMessage: jest.fn()
       },
       config: {
         agents: {
@@ -37,7 +39,13 @@ describe('AgentIndex', () => {
         info: jest.fn(),
         error: jest.fn(),
         trace: jest.fn()
-      }
+      },
+      on: jest.fn(),
+      groups: {
+        get: jest.fn()
+      },
+      pause: jest.fn(),
+      resume: jest.fn()
     }
     agentIndex = new AgentIndex(api)
     agentIndex.registerDriver('driver1', Driver)

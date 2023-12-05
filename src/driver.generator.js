@@ -1,8 +1,8 @@
 /**
  * @typedef {Object} GeneratorConfig
  * @property {number} [interval=5000] The interval in milliseconds at which to send messages.
- * @property {String}  [to] The name of the agent to send messages to. Defaults to a random agent or group.
- * @property {String} [content] The content of the message to send. Defaults to a generic message with from/to info.
+ * @property {string}  [to] The name of the agent to send messages to. Defaults to a random agent or group.
+ * @property {string} [content] The content of the message to send. Defaults to a generic message with from/to info.
  */
 
 export default class GeneratorDriver {
@@ -15,16 +15,16 @@ export default class GeneratorDriver {
    * Creates a new OpenAI driver.
    * @param {API} api The API object that allows to interact with the system.
    * @param {string} name The name of the agent for which this driver is running.
-   * @param {GeneratorConfig} config The configuration object for this driver.
+   * @param {AgentConfig} config The configuration object for this driver.
    */
-  constructor(api, name, config) {
+  constructor({api, name, config}) {
     this.#api = api
     this.#agentName = name
     this.#config = config
     setTimeout(() => {
       this.resume()
-    }, Math.random() * 5000)
-    api.log.info('Created Generator driver for agent', name)
+    }, Math.random() * (this.#config.interval || 5000))
+    api.log.debug('Created Generator driver for agent', name)
     api.log.trace('Generator driver config:', config)
   }
 
@@ -66,7 +66,7 @@ export default class GeneratorDriver {
       let to = this.#config.to
       if (!to) {
         const candidates = [
-          ...Object.keys(this.#api.groups.map()),
+          ...this.#api.groups.list(),
           ...Object.keys(this.#api.agents.all()).filter(
             (name) => name !== from
           )

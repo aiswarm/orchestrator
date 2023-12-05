@@ -1,13 +1,20 @@
 /**
- * @typedef AgentConfig
+ * @typedef {Object} AgentConfig
  * @description This is the interface that map agent configuration objects must implement.
  * @property {string} type The type of the agent as unique identifier.
- * @property {string} description The job description of this agent.
+ * @property {string} instructions The initial set of instructions to use for the assistant.
+ * @property {string[]} skills The skills assigned to the assistant.
  * @property {boolean} entrypoint Whether this agent is an entry point or not.
  * @property {boolean} creator Whether this agent can add other agents or not.
- * @todo {boolean} creatable Whether this agent can be created by other agents or not.
- * @property {boolean} isolate Whether this agent should be isolated from other agents or not. Set's creator to false.
  * @property {DriverConfig} driver The driver to use for this agent.
+ */
+
+/**
+ * @typedef {Object} AgentSkill
+ * @description This is the interface that agent skill functions must implement. Need to rethink this
+ * @property {string} name The name of the skill.
+ * @property {string} description The description of the skill.
+ * @poroperty {Object.<string, *>} parameters The parameters of the skill. Uses JSON schema. See https://json-schema.org/understanding-json-schema
  */
 
 import Communications from './comms.js'
@@ -23,24 +30,24 @@ export default class Agent {
 
   /**
    * Creates a new agent.
-   * @param {API} api The API object to use.
+   * @param {AgentIndex} index The API object to use.
    * @param {string} name The name of the agent.
    * @param {AgentConfig} config The configuration object for this agent.
    * @param {Driver} driver The driver object to use for this agent.
    */
-  constructor(api, name, config, driver) {
-    this.#api = api
+  constructor(index, name, config) {
+    this.#api = index.api
     this.#name = name
     this.#config = config
-    this.#driver = driver
+    this.#driver = index.getAgentDriver(name, config, config.instructions)
     if (this.#driver.instruct) {
-      api.comms.on(name, async (message) => {
+      index.api.comms.on(name, async (message) => {
         const response = await this.#driver.instruct(message)
         if (response) {
           if (response instanceof Communications.Message) {
-            api.comms.emit(response)
+            index.api.comms.emit(response)
           } else if (response.trim().length) {
-            api.comms.emit(message.source, name, response)
+            index.api.comms.emit(message.source, name, response)
           }
         }
       })
@@ -64,7 +71,10 @@ export default class Agent {
   }
 
   async instruct(prompt) {
-    return this.#driver.instruct(this.#name, prompt)
+    if (!this.#driver.instruct) {
+      throw new Error(`Driver for agent ${this.#name} does not implement an instruct method.`)
+    }
+    return this.#driver.instruct(prompt)
   }
 
   play() {

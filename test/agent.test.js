@@ -13,7 +13,8 @@ describe('Agent', () => {
     }
     mockApi = {
       comms: {
-        on: jest.fn()
+        on: jest.fn(),
+        emit: jest.fn()
       }
     }
     mockConfig = {
@@ -57,7 +58,7 @@ describe('Agent', () => {
     it('should call the driver instruct method with the correct prompt', async () => {
       const prompt = 'test prompt'
       const result = await agent.instruct(prompt)
-      expect(mockDriver.instruct).toHaveBeenCalledWith('testAgent', prompt)
+      expect(mockDriver.instruct).toHaveBeenCalledWith(prompt)
       expect(result).toBe('instruction result')
     })
 

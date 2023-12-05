@@ -29,7 +29,7 @@ describe('config.js', () => {
 
     it('reads the configuration file from the file system', async () => {
       const result = await readConfig(happyFile, log)
-      expect(result.global.agents.driver.type).toBe('openai')
+      expect(result.global.agents.driver.type).toBe('generator')
     })
 
     it('applies the globals from the configuration to the individual sections', async () => {
@@ -38,7 +38,7 @@ describe('config.js', () => {
           agents: {
             create: true,
             driver: {
-              type: 'openai'
+              type: 'generator'
             }
           }
         },
@@ -50,7 +50,7 @@ describe('config.js', () => {
       }
       applyGlobalConfig(config)
       expect(config.agents.test.create).toBe(true)
-      expect(config.agents.test.driver.type).toBe('openai')
+      expect(config.agents.test.driver.type).toBe('generator')
     })
 
     it('applies the drivers from the configuration to the agents', async () => {

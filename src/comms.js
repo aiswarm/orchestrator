@@ -104,6 +104,9 @@ export default class Communications extends On {
    * @return {boolean} True if the messageInput was sent successfully.
    */
   emit(event, ...args) {
+    if (!this.#api.running) {
+      throw new Error('Cannot send messages when the API is not running.')
+    }
     const message =
       event instanceof Message
         ? event

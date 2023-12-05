@@ -17,6 +17,16 @@ export default class AgentIndex {
    */
   constructor(api) {
     this.#api = api
+    api.on('pause', this.pause)
+    api.on('resume', this.resume)
+  }
+
+  /**
+   * Returns the API object.
+   * @return {API}
+   */
+  get api() {
+    return this.#api
   }
 
   /**
@@ -48,6 +58,11 @@ export default class AgentIndex {
     }
   }
 
+  /**
+   * @todo This can probably be moved to the index.js that manages the cli.
+   * @param instructions
+   * @return {Promise<void>}
+   */
   async run(instructions) {
     this.#api.log.info('Sending initial instructions', instructions)
     for (let agent of this.withEntryPoints()) {
@@ -56,9 +71,11 @@ export default class AgentIndex {
         'user',
         instructions
       )
+      this.#api.resume()
       this.#api.comms.emit(message)
     }
   }
+
 
   pause() {
     for (let agentName in this.#agents) {
@@ -121,8 +138,7 @@ export default class AgentIndex {
     if (this.#agents[name]) {
       return this.#agents[name]
     }
-    const driver = this.getAgentDriver(name, config.driver)
-    const agent = new Agent(this.#api, name, config, driver)
+    const agent = new Agent(this, name, config)
     this.#agents[name] = agent
     this.#agentsByDriver[config.driver.type] ??= []
     this.#agentsByDriver[config.driver.type].push(agent)
@@ -138,21 +154,39 @@ export default class AgentIndex {
    * @param {Class} driver
    */
   registerDriver(type, driver) {
-    this.#api.log.trace(`Registering driver with type ${type}.`)
+    this.#api.log.debug(`Registering driver with type ${type}.`)
     this.#drivers[type] = driver
   }
 
   /**
-   * This method is used to get a driver object by name.
+   * This method is used to get a driver object by name. Drivers are passed a number of parameters as an object.
    *  @param {string} name The name of the agent for which to get the driver.
-   *  @param {DriverConfig} config The configuration object for the driver.
+   *  @param {AgentConfig} config The configuration object for the driver.\
+   *  @param {string} instructions The initial set of instructions to use for the assistant.
    */
-  getAgentDriver(name, config) {
-    const type = config.type
+  getAgentDriver(name, config, instructions) {
+    const type = config.driver.type
     try {
-      return new this.#drivers[type](this.#api, name, config)
+      return new this.#drivers[type]({
+        api: this.#api,
+        index: this,
+        name,
+        config, // defaults to agent config
+        agentConfig: config,
+        driverConfig: config.driver,
+        instructions
+      })
     } catch (e) {
+      this.#api.log.error(e.message, e.stack)
       throw new Error(`Driver ${type} for agent ${name} not found.`)
     }
+  }
+
+  /**
+   * Returns a list of available drivers.
+   * @return {string[]} The available drivers.
+   */
+  availableDrivers() {
+    return Object.keys(this.#drivers)
   }
 }

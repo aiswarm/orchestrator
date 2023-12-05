@@ -61,7 +61,7 @@ export default async function loadPlugins(api) {
 async function initialize(api, packageJson) {
   try {
     const packageInfo = JSON.parse(
-      fs.readFileSync(packageJson, { encoding: 'utf8' })
+      fs.readFileSync(packageJson, {encoding: 'utf8'})
     )
     if (!packageInfo.keywords?.includes(pluginKeyword)) {
       api.log.trace(
@@ -92,6 +92,8 @@ async function initialize(api, packageJson) {
       )
     }
   } catch (e) {
-    api.log.error(`Error loading plugin ${packageJson}: ${e}`)
+    const packageName = path.basename(path.dirname(packageJson))
+    api.log.error(`Error loading plugin ${packageName}: ${e.message}`)
+    api.log.debug(e)
   }
 }

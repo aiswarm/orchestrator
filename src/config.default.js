@@ -6,24 +6,25 @@ const config = {
   global: {
     agents: {
       driver: {
-        type: 'generator',
+        type: 'generator'
       },
-    },
+      groups: []
+    }
   },
   comms: {
     history: {
       limits: {
         all: 100_000,
-        individual: 10_000,
-      },
-    },
+        individual: 10_000
+      }
+    }
   },
   drivers: {
     generator: {
-      interval: 5000,
-    },
+      interval: 5000
+    }
   },
   agents: {},
-  groups: {},
+  groups: {}
 }
 export default config

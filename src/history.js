@@ -71,7 +71,7 @@ export default class History {
 
   /**
    * Returns the last n messages sent to the target.
-   * @param {String} target The target of the messages.
+   * @param {string} target The target of the messages.
    * @param {number} [limit=10000] The number of messages to return.
    * @return {Message[] | undefined} The last n messages sent to the target or undefined if the target has no history.
    */
@@ -81,7 +81,7 @@ export default class History {
 
   /**
    * Returns the last n messages sent by the source.
-   * @param {String} source The source of the messages.
+   * @param {string} source The source of the messages.
    * @param {number} [limit=10000] The number of messages to return
    * @return {Message[] | undefined} The last n messages sent by the source or undefined if the source has no history.
    */

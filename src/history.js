@@ -73,19 +73,19 @@ export default class History {
    * Returns the last n messages sent to the target.
    * @param {string} target The target of the messages.
    * @param {number} [limit=10000] The number of messages to return.
-   * @return {Message[] | undefined} The last n messages sent to the target or undefined if the target has no history.
+   * @return {Message[] | undefined} The last n messages sent to the target or an empty array if the target has no history.
    */
   byTarget(target, limit = this.#api.config.comms.history.limits.individual) {
-    return this.#byTarget[target]?.slice(-limit)
+    return this.#byTarget[target]?.slice(-limit) ?? []
   }
 
   /**
    * Returns the last n messages sent by the source.
    * @param {string} source The source of the messages.
    * @param {number} [limit=10000] The number of messages to return
-   * @return {Message[] | undefined} The last n messages sent by the source or undefined if the source has no history.
+   * @return {Message[] | undefined} The last n messages sent by the source or an empty array  if the source has no history.
    */
   bySource(source, limit = this.#api.config.comms.history.limits.individual) {
-    return this.#bySource[source]?.slice(-limit)
+    return this.#bySource[source]?.slice(-limit) ?? []
   }
 }

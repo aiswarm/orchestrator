@@ -109,11 +109,11 @@ export default class Communications extends On {
       throw new Error('Cannot send messages when the API is not running.')
     }
     const message =
-        event instanceof Message
-            ? event
-            : event instanceof Object
-                ? new Message(event.target, event.source, event.content, event.type)
-                : new Message(event, args[0], args[1], args[2])
+      event instanceof Message
+        ? event
+        : event instanceof Object
+          ? new Message(event.target, event.source, event.content, event.type)
+          : new Message(event, args[0], args[1], args[2])
     this.#history.add(message)
 
     if (message.target !== 'all') {

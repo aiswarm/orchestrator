@@ -91,16 +91,16 @@ This is where you define the agents and their properties. The properties are as 
   add other agents. If you don't specify this, it will default to false.
 * `driver` - This allows you to fine tune settings for each agent and which driver it uses. The default driver is the
   openai driver. The properties are as follows:
-    * `type` - This is the type of driver to use. The default is `openai`. The only other option is `local`. This is
-      used for testing purposes.
-    * `model` - This is the model to use. The default is `gpt-4-turbo`. The only other option is `gpt-3`. This is used
-      for testing purposes.
-    * `temperature` - This is the temperature to use. The default is `0.9`. This is used for testing purposes.
-    * `max_tokens` - This is the maximum number of tokens to use. The default is `100`. This is used for testing
-      purposes.
-    * `flags` - This is a set of flags that can be used to control the driver. By default, map flags are set to `true`.
-      The flags are as follows:
-        * `browse` - This is a boolean that indicates whether the driver should open a browser window. The default
-          is `true`.
-        * `generate` - This is a boolean that indicates whether the driver should generate text. The default is `true`.
-        * `analyze` - This is a boolean that indicates whether the driver should analyze text. The default is `true`.
+  * `type` - This is the type of driver to use. The default is `openai`. The only other option is `local`. This is
+    used for testing purposes.
+  * `model` - This is the model to use. The default is `gpt-4-turbo`. The only other option is `gpt-3`. This is used
+    for testing purposes.
+  * `temperature` - This is the temperature to use. The default is `0.9`. This is used for testing purposes.
+  * `max_tokens` - This is the maximum number of tokens to use. The default is `100`. This is used for testing
+    purposes.
+  * `flags` - This is a set of flags that can be used to control the driver. By default, map flags are set to `true`.
+    The flags are as follows:
+    * `browse` - This is a boolean that indicates whether the driver should open a browser window. The default
+      is `true`.
+    * `generate` - This is a boolean that indicates whether the driver should generate text. The default is `true`.
+    * `analyze` - This is a boolean that indicates whether the driver should analyze text. The default is `true`.

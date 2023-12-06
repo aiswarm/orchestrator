@@ -20,7 +20,7 @@
     "no-lonely-if": "error",
     "comma-dangle": [
       "error",
-      "only-multiline"
+      "never"
     ],
     "comma-spacing": [
       "error",
@@ -48,6 +48,10 @@
     "semi-style": [
       "error",
       "last"
+    ],
+    "curly": [
+      "error",
+      "all"
     ],
     "no-unused-vars": [
       "warn"

@@ -29,6 +29,6 @@ export async function initialize(configPath, loglevel = 'info') {
   return {
     run: (prompt) => {
       api.agents.run(prompt)
-    },
+    }
   }
 }

@@ -25,22 +25,29 @@ export default class History {
    * Starts the history cleaner, an interval that runs every second and removes old messages from the history.
    */
   #cleanRunner() {
-    if (this.#interval) clearInterval(this.#interval)
+    if (this.#interval) {
+      clearInterval(this.#interval)
+    }
     this.#interval = setInterval(() => {
-      while (this.#all.length > this.#api.config.comms.history.limits.all)
+      while (this.#all.length > this.#api.config.comms.history.limits.all) {
         this.#all.shift()
-      for (const entry in this.#byTarget)
+      }
+      for (const entry in this.#byTarget) {
         while (
           this.#byTarget[entry].length >
           this.#api.config.comms.history.limits.individual
-        )
+        ) {
           this.#byTarget[entry].shift()
-      for (const entry in this.#bySource)
+        }
+      }
+      for (const entry in this.#bySource) {
         while (
           this.#bySource[entry].length >
           this.#api.config.comms.history.limits.individual
-        )
+        ) {
           this.#bySource[entry].shift()
+        }
+      }
     }, 1000)
   }
 

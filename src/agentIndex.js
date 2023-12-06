@@ -45,9 +45,7 @@ export default class AgentIndex {
     for (let agentName in agentsMap) {
       let agentConfig = agentsMap[agentName]
       let agent = this.create(agentName, agentConfig)
-      this.#api.log.info(
-          `Created agent ${agentName} with driver ${agent.driver.type}`
-      )
+      this.#api.log.info(`Created agent ${agentName} with driver ${agent.driver.type}`)
     }
 
     // If no agents have entry points, map agents are entry points
@@ -66,11 +64,7 @@ export default class AgentIndex {
   async run(instructions) {
     this.#api.log.info('Sending initial instructions', instructions)
     for (let agent of this.withEntryPoints()) {
-      const message = this.#api.comms.createMessage(
-        agent.name,
-        'user',
-          instructions
-      )
+      const message = this.#api.comms.createMessage(agent.name, 'user', instructions)
       this.#api.resume()
       this.#api.comms.emit(message)
     }

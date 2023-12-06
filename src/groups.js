@@ -35,7 +35,9 @@ export default class Groups extends On {
     if (this.#api.agents.get(name)) {
       throw new Error(`Group ${name} already exists as an agent.`)
     }
-    if (Array.isArray(members[0])) members = members[0]
+    if (Array.isArray(members[0])) {
+      members = members[0]
+    }
     if (this.#api.config.groups[name]) {
       this.#api.config.groups[name] = [
         ...new Set([...this.#api.config.groups[name], ...members])
@@ -84,8 +86,8 @@ export default class Groups extends On {
    */
   forAgent(name) {
     return Object.entries(this.#api.config.groups)
-    .filter(([, members]) => members.includes(name))
-    .map(([name]) => name)
+      .filter(([, members]) => members.includes(name))
+      .map(([name]) => name)
   }
 
   /**
@@ -95,7 +97,9 @@ export default class Groups extends On {
    * @fires Groups#removed
    */
   remove(name) {
-    if (!this.#api.config.groups[name]) return false
+    if (!this.#api.config.groups[name]) {
+      return false
+    }
     delete this.#api.config.groups[name]
     /**
      * @event Groups#removed

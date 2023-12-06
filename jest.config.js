@@ -4,10 +4,10 @@ export default {
   collectCoverage: true,
   testMatch: ['**/test/**/*.test.js'],
   transform: {
-    '^.+\\.m?jsx?$': 'babel-jest',
+    '^.+\\.m?jsx?$': 'babel-jest'
   },
   transformIgnorePatterns: [
     '/node_modules/(?!(@aiswarm)/)',
-    '/node_modules/(?!onall).+\\.js$',
-  ],
+    '/node_modules/(?!onall).+\\.js$'
+  ]
 }

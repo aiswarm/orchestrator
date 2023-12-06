@@ -79,7 +79,7 @@ export function findConfig(configPath, log) {
     }
   }
   log.debug(
-      `No file or directory found at config path, using default path ${defaultPath}`
+    `No file or directory found at config path, using default path ${defaultPath}`
   )
   return defaultPath
 }

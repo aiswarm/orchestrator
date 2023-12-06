@@ -10,15 +10,15 @@ describe('Communications', () => {
         comms: {
           history: {
             limits: {
-                all: 10
-            },
-          },
-        },
+              all: 10
+            }
+          }
+        }
       },
       running: true,
       groups: {
-          get: jest.fn()
-      },
+        get: jest.fn()
+      }
     }
     comms = new Communications(api)
   })

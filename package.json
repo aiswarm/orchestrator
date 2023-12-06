@@ -2,10 +2,10 @@
   "name": "@aiswarm/orchestrator",
   "version": "1.0.0",
   "description": "Organizes a swarm of AI agents to work together",
-  "main": "src/index.js",
+  "main": "index.js",
   "type": "module",
   "bin": {
-    "ai_swarm_orchestrator": "./index.js"
+    "ai_swarm_orchestrator": "node ./index.js"
   },
   "scripts": {
     "start": "node index.js run",

@@ -46,7 +46,6 @@ Optional Commands:
   let loglevel = 'info'
   options.debug && (loglevel = 'debug')
   options.verbose && (loglevel = 'trace')
-
   const [command, prompt] = program.args
   switch (command) {
   case undefined:

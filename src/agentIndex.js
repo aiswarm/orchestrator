@@ -37,7 +37,7 @@ export default class AgentIndex {
 
     if (!agentsMap || Object.keys(agentsMap).length === 0) {
       this.#api.log.error('No agents configured!')
-      throw new Error('No agents configured!')
+      return
     }
     this.#api.log.info('Setting up agents')
 
@@ -46,7 +46,7 @@ export default class AgentIndex {
       let agentConfig = agentsMap[agentName]
       let agent = this.create(agentName, agentConfig)
       this.#api.log.info(
-        `Created agent ${agentName} with driver ${agent.driver.type}`
+          `Created agent ${agentName} with driver ${agent.driver.type}`
       )
     }
 
@@ -69,7 +69,7 @@ export default class AgentIndex {
       const message = this.#api.comms.createMessage(
         agent.name,
         'user',
-        instructions
+          instructions
       )
       this.#api.resume()
       this.#api.comms.emit(message)

@@ -163,6 +163,7 @@ class API extends On {
    */
   registerAgentDriver(type, driver) {
     this.#agents.registerDriver(type, driver)
+    this.#config.drivers[type] ??= {}
     this.emit('agentDriverRegistered', type)
   }
 

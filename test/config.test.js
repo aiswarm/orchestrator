@@ -39,14 +39,14 @@ describe('config.js', () => {
             create: true,
             driver: {
               type: 'generator'
-            }
-          }
+            },
+          },
         },
         agents: {
           test: {
             instructions: 'test'
-          }
-        }
+          },
+        },
       }
       applyGlobalConfig(config)
       expect(config.agents.test.create).toBe(true)
@@ -58,16 +58,16 @@ describe('config.js', () => {
         drivers: {
           openai: {
             apiKey: 'test'
-          }
+          },
         },
         agents: {
           test: {
             instructions: 'test',
             driver: {
               type: 'openai'
-            }
-          }
-        }
+            },
+          },
+        },
       }
       applyDrivers(config)
       expect(config.agents.test.driver.apiKey).toBe('test')
@@ -82,8 +82,8 @@ describe('config.js', () => {
           test: {
             instructions: 'test',
             groups: ['group2']
-          }
-        }
+          },
+        },
       }
       applyGroups(config)
       expect(config.agents.test.groups).toContain('group1')
@@ -95,16 +95,16 @@ describe('config.js', () => {
         drivers: {
           openai: {
             apiKey: 'test'
-          }
+          },
         },
         agents: {
           test: {
             instructions: 'test',
             driver: {
               type: 'openai'
-            }
-          }
-        }
+            },
+          },
+        },
       }
       validateConfig(config, log)
     })

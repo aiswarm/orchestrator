@@ -1,4 +1,5 @@
-/** Reads the configuration from the file system.
+/**
+ * Reads the configuration from the file system.
  * @description This module reads the configuration from the file system based on a given path. Depending on whether the
  * path is a file or directory, the configuration is parsed and processed here into a single combined json object.
  * Directories will be parsed recursively to build the configuration object, using directory and file names as keys.
@@ -17,6 +18,16 @@
  * @property {Object.<string, AgentConfig>} agents Agents to add on startup, keys are agent names, values are agent configuration objects.
  */
 
+/**
+ * @typedef {Class} Config
+ * @description This is main structure of the configuration object. It includes many sub-objects that are used to
+ * configure the system.
+ * @property {Object} global The global configuration object. Settings here will be applied to map settings of their respective groups.
+ * @property {AgentConfig} global.agents The global agent configuration object. Settings here will be applied to map agents.
+ * @property {DriverConfig} drivers The driver configuration object. Keys are driver types, values are driver configuration objects.
+ * @property {Object.<string, string[]>} groups Groups of agents, keys are group names, values are lists of agent names or types.
+ * @property {Object.<string, AgentConfig>} agents Agents to add on startup, keys are agent names, values are agent configuration objects.
+ */
 import fs from 'fs'
 import path from 'path'
 import logger from 'console-log-level'
@@ -68,7 +79,7 @@ export function findConfig(configPath, log) {
     }
   }
   log.debug(
-    `No file or directory found at config path, using default path ${defaultPath}`
+      `No file or directory found at config path, using default path ${defaultPath}`
   )
   return defaultPath
 }
@@ -210,11 +221,6 @@ export function validateConfig(config, log) {
       log.error(`Agent ${agentName} does not have a driver type specified.`)
       log.trace('Config:', config)
       throw new Error(`Agent ${agentName} does not have a type specified.`)
-    }
-    if (!config.drivers[agent.driver.type]) {
-      log.error(`Agent ${agentName} has an unknown type ${agent.driver.type}.`)
-      log.trace('Config:', config)
-      throw new Error(`Agent ${agentName} has an unknown type ${agent.type}.`)
     }
   }
   if (Object.keys(config.drivers).length === 0) {

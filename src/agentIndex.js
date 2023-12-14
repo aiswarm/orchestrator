@@ -9,8 +9,10 @@ export default class AgentIndex {
   #agentsByDriver = {}
   /** @type {Agent[]} */
   #agentsWithEntryPoints = []
-  /** @type {Object.<string, Class>} */
+  /** @type {Object.<string, Class<AgentDriver>>} */
   #drivers = {}
+  /** @type {Object<string, Class<AgentSkill>>} */
+  #skills= {}
 
   /**
    * @param {API} api

@@ -10,18 +10,23 @@ import Config from './config.js'
 import API from '../api.js'
 import plugins from './plugins.js'
 import GeneratorDriver from './driver.generator.js'
+import TimeAndDateSkill from './skills/getTimeAndDate.js'
 
 export async function initialize(configPath, loglevel = 'info') {
   let log = logger({level: loglevel})
   log.info('Starting AI Swarm Orchestrator')
 
-  // Load 3rd party plugins
   const config = await Config(configPath, loglevel)
   let api = API(config, loglevel)
-  await plugins(api)
 
   // Add built-in driver(s)
   api.registerAgentDriver('generator', GeneratorDriver)
+
+  // Add built-in skills
+  api.registerAgentSkill('getTimeAndDate', TimeAndDateSkill)
+
+  // Load 3rd party plugins
+  await plugins(api)
 
   // Set up agents
   api.agents.initialize()

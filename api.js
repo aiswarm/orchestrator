@@ -3,6 +3,7 @@ import AgentIndex from './src/agentIndex.js'
 import Communications from './src/comms.js'
 import Groups from './src/groups.js'
 import On from 'onall'
+import Skills from './src/skills.js'
 
 /**
  * @typedef {Object} Logger
@@ -20,7 +21,7 @@ import On from 'onall'
  */
 
 /**
- * @typedef {Class} Driver
+ * @typedef {Class} AgentDriver
  * @description This is the interface that map drivers must implement.
  * @property {function} constructor The constructor for the driver. It will be passed the configuration object.
  * @property {string} type The type of the driver as unique identifier.\
@@ -52,13 +53,14 @@ class API extends On {
   #log
   /** @type {Communications} */
   #comms
-  #drivers = {}
   /** @type {AgentIndex} */
   #agents
   /** @type {Groups} */
   #groups
   /** @type {boolean} */
   #running = false
+  /** @type {Skills} */
+  #skills
 
   /**
    * Creates a new API object.
@@ -72,6 +74,7 @@ class API extends On {
     this.#groups = new Groups(this)
     this.#comms = new Communications(this)
     this.#agents = new AgentIndex(this)
+    this.#skills = new Skills(this)
   }
 
   /**
@@ -123,6 +126,10 @@ class API extends On {
     return this.#groups
   }
 
+  get skills() {
+    return this.#skills
+  }
+
   /**
    * This method is used to get the running state of the API.
    * @return {boolean}
@@ -159,12 +166,22 @@ class API extends On {
   /**
    * This method is used to register a driver class by type.
    * @param {string} type The type of the driver to register.
-   * @param {Class} driver
+   * @param {Class<AgentDriver>} driver
    */
   registerAgentDriver(type, driver) {
     this.#agents.registerDriver(type, driver)
     this.#config.drivers[type] ??= {}
-    this.emit('agentDriverRegistered', type)
+    this.emit('agentDriverRegistered', type, driver)
+  }
+
+  /**
+   * This method is used to register a skill.
+   * @param {string} name
+   * @param {Class<AgentSkill>} skill
+   */
+  registerAgentSkill(name, skill) {
+    this.#skills.add(name, skill)
+    this.emit('agentSkillRegistered', name, skill)
   }
 
   pause() {

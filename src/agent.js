@@ -9,13 +9,6 @@
  * @property {DriverConfig} driver The driver to use for this agent.
  */
 
-/**
- * @typedef {Object} AgentSkill
- * @description This is the interface that agent skill functions must implement. Need to rethink this
- * @property {string} name The name of the skill.
- * @property {string} description The description of the skill.
- * @poroperty {Object.<string, *>} parameters The parameters of the skill. Uses JSON schema. See https://json-schema.org/understanding-json-schema
- */
 
 import Communications from './comms.js'
 
@@ -59,7 +52,7 @@ export default class Agent {
 
   /**
    * Returns the type of the driver instance.
-   * @return {Driver}
+   * @return {AgentDriver}
    */
   get driver() {
     return this.#driver
@@ -84,3 +77,4 @@ export default class Agent {
     this.#driver.pause()
   }
 }
+

@@ -8,7 +8,7 @@ import fs from 'fs'
 import path from 'path'
 
 const nodeModulesPath = path.join(process.cwd(), 'node_modules')
-const pluginKeyword = 'ai_so:plugin'
+const pluginKeyword = '@aiswarm:plugin'
 
 /**
  * Looks for plugins in the node_modules directory and loads them if they are tagged with the plugin keyword.

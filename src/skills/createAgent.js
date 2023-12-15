@@ -21,7 +21,8 @@ export default class CreateAgent {
       },
       driver: {
         type: 'string',
-        description: 'The type of driver to use for the agent. Options are: ' + this.#api.agents.availableDrivers().join(', ') + '. If you need more information about the skills, use getSkillInfo'
+        description: 'The type of driver to use for the agent.',
+        enum: this.#api.agents.availableDrivers()
       },
       description: {
         type: 'string',
@@ -33,7 +34,8 @@ export default class CreateAgent {
       },
       skills: {
         type: 'array',
-        description: 'An array of skills to assign to the agent. Options are: ' + this.#api.skills.list().join(', '),
+        description: 'An array of skills to assign to the agent',
+        enum: this.#api.skills.list(),
         items: {
           type: 'string'
         }

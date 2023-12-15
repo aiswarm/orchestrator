@@ -25,7 +25,7 @@ export default class SendMessage {
       },
       type: {
         type: 'string',
-        description: 'Can be ignored for now, defaults to string which is the only format we support at this point.'
+        description: 'Can be ignored for now, defaults to "string" which is the only format we support at this point.'
       }
     }
   }

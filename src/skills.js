@@ -34,13 +34,13 @@ export default class Skills {
 
   /**
    * Adds a skill to the agent.
-   * @param {string} name The name of the skill. This is the unique identifier used later in the configuration.
    * @param {Class<AgentSkill>} skill The skill to add.
    */
-  add(name, skill) {
-    this.#skills[name] = new (skill)({
+  add(skill) {
+    const skillInstance = new (skill)({
       api: this.#api
     })
+    this.#skills[skillInstance.name] = skillInstance
   }
 
   /**
@@ -69,7 +69,7 @@ export default class Skills {
       throw new Error(`Trying to execute Skill ${name}: not found`)
     }
     try {
-      return skill.execute(args, agentName)
+      return await skill.execute(args, agentName)
     } catch (e) {
       this.#api.log.error(`Error executing skill ${name}: ${e.message}`)
       this.#api.log.debug(e)

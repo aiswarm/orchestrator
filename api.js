@@ -176,12 +176,11 @@ class API extends On {
 
   /**
    * This method is used to register a skill.
-   * @param {string} name
    * @param {Class<AgentSkill>} skill
    */
-  registerAgentSkill(name, skill) {
-    this.#skills.add(name, skill)
-    this.emit('agentSkillRegistered', name, skill)
+  registerAgentSkill(skill) {
+    this.#skills.add(skill)
+    this.emit('agentSkillRegistered', skill)
   }
 
   pause() {

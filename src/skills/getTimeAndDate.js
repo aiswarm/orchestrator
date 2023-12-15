@@ -8,6 +8,10 @@ export default class TimeAndDateSkill {
     this.#api = api
   }
 
+  get name() {
+    return 'getTimeAndDate'
+  }
+
   get description() {
     return 'Returns date/time formatted according to the given format'
   }

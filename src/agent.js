@@ -62,6 +62,10 @@ export default class Agent {
     return this.#config
   }
 
+  get groups() {
+    return this.#config.groups
+  }
+
   async instruct(prompt) {
     if (!this.#driver.instruct) {
       throw new Error(`Driver for agent ${this.#name} does not implement an instruct method.`)

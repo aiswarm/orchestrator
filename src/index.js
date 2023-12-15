@@ -12,6 +12,10 @@ import plugins from './plugins.js'
 import GeneratorDriver from './driver.generator.js'
 import TimeAndDateSkill from './skills/getTimeAndDate.js'
 import GetAgentsAndGroups from './skills/getAgentsAndGroups.js'
+import CreateAgent from './skills/createAgent.js'
+import CreateGroup from './skills/createGroup.js'
+import SendMessage from './skills/sendMessage.js'
+import GetSkillInfo from './skills/getSkillInfo.js'
 
 export async function initialize(configPath, loglevel = 'info') {
   let log = logger({level: loglevel})
@@ -24,8 +28,12 @@ export async function initialize(configPath, loglevel = 'info') {
   api.registerAgentDriver('generator', GeneratorDriver)
 
   // Add built-in skills
+  api.registerAgentSkill(CreateAgent)
+  api.registerAgentSkill(GetSkillInfo)
+  api.registerAgentSkill(CreateGroup)
   api.registerAgentSkill(TimeAndDateSkill)
   api.registerAgentSkill(GetAgentsAndGroups)
+  api.registerAgentSkill(SendMessage)
 
   // Load 3rd party plugins
   await plugins(api)

@@ -158,9 +158,8 @@ export default class AgentIndex {
    * This method is used to get a driver object by name. Drivers are passed a number of parameters as an object.
    *  @param {string} name The name of the agent for which to get the driver.
    *  @param {AgentConfig} config The configuration object for the driver.\
-   *  @param {string} instructions The initial set of instructions to use for the assistant.
    */
-  getAgentDriver(name, config, instructions) {
+  getAgentDriver(name, config) {
     const type = config.driver.type
     try {
       return new this.#drivers[type]({
@@ -168,9 +167,8 @@ export default class AgentIndex {
         index: this,
         name,
         config, // defaults to agent config
-        agentConfig: config,
-        driverConfig: config.driver,
-        instructions
+        agentConfig: config, // convenience alias for developers
+        driverConfig: config.driver // convenience alias for developers
       })
     } catch (e) {
       this.#api.log.error(e.message, e.stack)

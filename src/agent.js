@@ -1,11 +1,10 @@
 /**
  * @typedef {Object} AgentConfig
  * @description This is the interface that map agent configuration objects must implement.
- * @property {string} type The type of the agent as unique identifier.
  * @property {string} instructions The initial set of instructions to use for the assistant.
- * @property {string[]} skills The skills assigned to the assistant.
- * @property {boolean} entrypoint Whether this agent is an entry point or not.
- * @property {boolean} creator Whether this agent can add other agents or not.
+ * @property {string} [description] The description of the agent.
+ * @property {string[]} [skills=[]] The skills assigned to the assistant.
+ * @property {boolean} [entrypoint = false] Whether this agent is an entry point or not.
  * @property {DriverConfig} driver The driver to use for this agent.
  */
 
@@ -31,9 +30,12 @@ export default class Agent {
     this.#api = index.api
     this.#name = name
     this.#config = config
-    this.#driver = index.getAgentDriver(name, config, config.instructions)
+    this.#driver = index.getAgentDriver(name, config)
     if (this.#driver.instruct) {
       index.api.comms.on(name, async (message) => {
+        if (message.source === name && this.groups.includes(message.target)) {
+          return // We get duplicate messages if we're part of the group and sending a message there. To prevent this, we just ignore messages that we send to the group, since they're already on the sender thread.
+        }
         const response = await this.#driver.instruct(message)
         if (response) {
           if (response instanceof Communications.Message) {
@@ -67,9 +69,6 @@ export default class Agent {
   }
 
   async instruct(prompt) {
-    if (!this.#driver.instruct) {
-      throw new Error(`Driver for agent ${this.#name} does not implement an instruct method.`)
-    }
     return this.#driver.instruct(prompt)
   }
 

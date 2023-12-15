@@ -47,15 +47,18 @@ export default class CreateAgent {
     return ['name', 'driver']
   }
 
-  execute({name, driver}) {
+  execute({name, driver, description, instructions, skills}) {
     if (this.#api.agents.get(name)) {
       return `Agent ${name} already exists`
     }
 
     const agent = this.#api.agents.create(name, {
+      description,
+      instructions,
       driver: {
         type: driver
-      }
+      },
+      skills
     })
 
     return {

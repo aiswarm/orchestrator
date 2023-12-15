@@ -27,6 +27,7 @@
 export default class Skills {
   #api
   #skills = {}
+  #collections = {}
 
   constructor(api) {
     this.#api = api
@@ -41,6 +42,14 @@ export default class Skills {
       api: this.#api
     })
     this.#skills[skillInstance.name] = skillInstance
+  }
+
+  addSkillCollection(name, skills) {
+    this.#collections[name] = skills
+  }
+
+  getSkillsCollection(name) {
+    return this.#collections[name]
   }
 
   /**

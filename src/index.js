@@ -34,6 +34,7 @@ export async function initialize(configPath, loglevel = 'info') {
   api.registerAgentSkill(TimeAndDateSkill)
   api.registerAgentSkill(GetAgentsAndGroups)
   api.registerAgentSkill(SendMessage)
+  api.skills.addSkillCollection('core', api.skills.list())
 
   // Load 3rd party plugins
   await plugins(api)

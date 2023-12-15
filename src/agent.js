@@ -30,6 +30,7 @@ export default class Agent {
     this.#api = index.api
     this.#name = name
     this.#config = config
+    this.#expandSkillCollections(config)
     this.#driver = index.getAgentDriver(name, config)
     if (this.#driver.instruct) {
       index.api.comms.on(name, async (message) => {
@@ -78,6 +79,18 @@ export default class Agent {
 
   pause() {
     this.#driver.pause()
+  }
+
+  #expandSkillCollections(config) {
+    if (!config.skills) {
+      return
+    }
+    for (const skillName of config.skills) {
+      const collection = this.#api.skills.getSkillsCollection(skillName)
+      if (collection) {
+        config.skills.splice(config.skills.indexOf(skillName), 1, ...collection)
+      }
+    }
   }
 }
 

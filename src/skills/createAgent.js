@@ -58,7 +58,7 @@ export default class CreateAgent {
       driver: {
         type: driver
       },
-      skills
+      skills: skills
     })
 
     return {

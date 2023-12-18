@@ -141,6 +141,7 @@ export default class AgentIndex {
     if (config.entrypoint) {
       this.#agentsWithEntryPoints.push(agent)
     }
+    config.skills ??= []
     return agent
   }
 

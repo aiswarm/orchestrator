@@ -10,7 +10,7 @@ export default class SendMessage {
   }
 
   get description() {
-    return 'Sends a message to a group or agent. Agents will respond if they are able to process the message. Groups will forward the message to all members'
+    return 'Sends a message to a group or agent. For agents to respond you will have to instruct them to use sendMessage, and who to send it to.'
   }
 
   get parameters() {

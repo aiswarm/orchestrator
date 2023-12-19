@@ -10,7 +10,7 @@ export default class CreateAgent {
   }
 
   get description() {
-    return 'Creates a new agent that will you can communicate with via sendMessage'
+    return 'Creates a new agent that you can communicate with via sendMessage.'
   }
 
   get parameters() {

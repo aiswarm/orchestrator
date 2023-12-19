@@ -40,8 +40,8 @@ export default class Communications extends On {
       event instanceof Message
         ? event
         : event instanceof Object
-          ? new Message(event.target, event.source, event.content, event.type)
-          : new Message(event, args[0], args[1], args[2])
+          ? new Message(this.#api, event.target, event.source, event.content, event.type)
+          : new Message(this.#api, event, args[0], args[1], args[2])
     this.#history.add(message)
 
     if (message.target !== 'all') {
@@ -65,6 +65,6 @@ export default class Communications extends On {
    * @return {Message} The newly created messageInput object.
    */
   createMessage(target, source, content, type = Message.stringType) {
-    return new Message(target, source, content, type)
+    return new Message(this.#api, target, source, content, type)
   }
 }

@@ -29,6 +29,8 @@ import Skills from './src/skills.js'
  * @property {function} initialize This method is used to initialize the driver.
  * @property {function} pause This method is used to pause the driver.
  * @property {function} resume This method is used to resume the driver.
+ * @property {string} status The status of the driver.
+ * @property {function} instruct This method is used to send a message to the driver.
  */
 
 /**

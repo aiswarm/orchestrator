@@ -19,6 +19,7 @@ export default class Agent {
   #config
   #driver
   #api
+  #status = 'created'
 
   /**
    * Creates a new agent.
@@ -30,6 +31,7 @@ export default class Agent {
     this.#api = index.api
     this.#name = name
     this.#config = config
+    this.#config.skills ??= []
     this.#expandSkillCollections(config)
     this.#driver = index.getAgentDriver(name, config)
     if (this.#driver.instruct) {
@@ -37,9 +39,11 @@ export default class Agent {
         if (message.source === name && this.groups.includes(message.target)) {
           return // We get duplicate messages if we're part of the group and sending a message there. To prevent this, we just ignore messages that we send to the group, since they're already on the sender thread.
         }
+        message.status = 'sent'
         const response = await this.#driver.instruct(message)
         if (response) {
           if (response instanceof Communications.Message) {
+            response.status = 'received'
             index.api.comms.emit(response)
           } else if (response.trim().length) {
             index.api.comms.emit(message.source, name, response)
@@ -47,6 +51,12 @@ export default class Agent {
         }
       })
     }
+    setInterval(() => {
+      if(this.#status !== this.#driver.status) {
+        this.#status = this.#driver.status
+        this.#api.emit('agentUpdated', this)
+      }
+    }, 250)
   }
 
   get name() {
@@ -62,11 +72,20 @@ export default class Agent {
   }
 
   get config() {
-    return this.#config
+    return this.#config ?? {}
   }
 
   get groups() {
-    return this.#config.groups
+    return this.#config.groups ?? []
+  }
+
+  get status() {
+    return this.#status
+  }
+
+  set status(status) {
+    this.#status = status
+    this.#api.emit('agentUpdated', this)
   }
 
   async instruct(prompt) {

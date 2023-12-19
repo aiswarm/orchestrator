@@ -7,14 +7,24 @@ export default class Message {
   static imageType = Symbol('image')
   static videoType = Symbol('video')
   static audioType = Symbol('audio')
-  static #id = 1
+  static #idCounter = 1
 
-  constructor(target, source, content, type = Message.stringType) {
-    this.id = Message.#id++
-    this.target = target
-    this.source = source
-    this.content = content
-    this.timestamp = new Date()
+  #api
+  #id
+  #target
+  #source
+  #content
+  #type
+  #timestamp
+  #status = 'created'
+
+  constructor(api, target, source, content, type = Message.stringType) {
+    this.#api = api
+    this.#id = Message.#idCounter++
+    this.#target = target
+    this.#source = source
+    this.#content = content
+    this.#timestamp = new Date()
     if (typeof type === 'string') {
       switch (type) {
       case 'image':
@@ -31,7 +41,40 @@ export default class Message {
         break
       }
     }
-    this.type = type
+    this.#type = type
+  }
+
+  get status() {
+    return this.#status
+  }
+
+  set status(status) {
+    this.#status = status
+    this.#api.emit('messageUpdated', this)
+  }
+
+  get id() {
+    return this.#id
+  }
+
+  get source() {
+    return this.#source
+  }
+
+  get target() {
+    return this.#target
+  }
+
+  get content() {
+    return this.#content
+  }
+
+  get timestamp() {
+    return this.#timestamp
+  }
+
+  get type() {
+    return this.#type
   }
 
   /**
@@ -43,19 +86,19 @@ export default class Message {
     case Message.imageType:
       return `Image ${this.id} from ${this.source} to ${
         this.target
-      } at ${this.timestamp.toLocaleTimeString()}`
+      } at ${this.timestamp.toLocaleTimeString()} is ${this.status}`
     case Message.videoType:
       return `Video ${this.id} from ${this.source} to ${
         this.target
-      } at ${this.timestamp.toLocaleTimeString()}`
+      } at ${this.timestamp.toLocaleTimeString()} is ${this.status}`
     case Message.audioType:
       return `Audio ${this.id} from ${this.source} to ${
         this.target
-      } at ${this.timestamp.toLocaleTimeString()}`
+      } at ${this.timestamp.toLocaleTimeString()} is ${this.status}`
     default:
       return `Message ${this.id} from ${this.source} to ${
         this.target
-      } at ${this.timestamp.toLocaleTimeString()}: ${this.content}`
+      } at ${this.timestamp.toLocaleTimeString()} is ${this.status}: ${this.content}`
     }
   }
 
@@ -65,9 +108,13 @@ export default class Message {
    */
   toObject() {
     return {
-      ...this,
-      type: this.type.toString().slice(7, -1),
-      timestamp: this.timestamp.toISOString()
+      id: this.#id,
+      source: this.#source,
+      target: this.#target,
+      content: this.#content,
+      type: this.#type.toString().slice(7, -1),
+      timestamp: this.#timestamp.toISOString(),
+      status: this.#status
     }
   }
 }

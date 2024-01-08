@@ -38,7 +38,7 @@ export default class CreateGroup {
       return `Group ${name} already exists`
     }
 
-    this.#api.groups.create(name, members)
+    this.#api.groups.add(name, members)
 
     return {
       name,

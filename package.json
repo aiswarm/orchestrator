@@ -4,19 +4,12 @@
   "description": "Organizes a swarm of AI agents to work together",
   "main": "index.js",
   "type": "module",
-  "bin": {
-    "ai_swarm_orchestrator": "node ./index.js"
-  },
   "scripts": {
-    "start": "node index.js run",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
-    "watch": "nodemon index.js --  run \"Starting Instructions\" -d",
-    "link": "npm link ../ui-web/ ../api-graphql/ ../driver-openai"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --coverage"
   },
   "author": "Ravi Gairola <mallox@pyxzl.net",
   "license": "MIT",
   "dependencies": {
-    "commander": "^11.1.0",
     "console-log-level": "^1.4.1",
     "onall": "^2.0.0"
   },

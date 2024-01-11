@@ -20,6 +20,7 @@ export default class Agent {
   #driver
   #api
   #status = 'created'
+  #interval
 
   /**
    * Creates a new agent.
@@ -39,11 +40,11 @@ export default class Agent {
         if (message.source === name && this.groups.includes(message.target)) {
           return // We get duplicate messages if we're part of the group and sending a message there. To prevent this, we just ignore messages that we send to the group, since they're already on the sender thread.
         }
-        message.status = 'sent'
+        message.status = 'received'
         const response = await this.#driver.instruct(message)
         if (response) {
           if (response instanceof Communications.Message) {
-            response.status = 'received'
+            response.status = 'processed'
             index.api.comms.emit(response)
           } else if (response.trim().length) {
             index.api.comms.emit(message.source, name, response)
@@ -51,7 +52,7 @@ export default class Agent {
         }
       })
     }
-    setInterval(() => {
+    this.#interval = setInterval(() => {
       if(this.#status !== this.#driver.status) {
         this.#status = this.#driver.status
         this.#api.emit('agentUpdated', this)
@@ -92,12 +93,23 @@ export default class Agent {
     return this.#driver.instruct(prompt)
   }
 
-  play() {
-    this.#driver.play()
+  resume() {
+    if (this.#driver.resume) {
+      this.#driver.resume()
+    }
   }
 
   pause() {
-    this.#driver.pause()
+    if (this.#driver.pause) {
+      this.#driver.pause()
+    }
+  }
+
+  remove() {
+    clearInterval(this.#interval)
+    if (this.#driver.remove) {
+      this.#driver.remove(this)
+    }
   }
 
   #expandSkillCollections(config) {

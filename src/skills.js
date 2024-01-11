@@ -2,6 +2,7 @@
  * @typedef {Class} AgentSkill
  * @description This is the interface that agent skill functions must implement.
  * @constructor {AgentSkillConstructor} options The options for this skill.
+ * @property {string} name The name of the skill.
  * @property {string} description The description of the skill.
  * @poroperty {Object.<string, *>} parameters The parameters of the skill. This is used to instruct the agent on how to call the skill.
  * @property {string[]} [required="<all parameters>"] The required parameters of the skill. If none are specified, all are required. Use an empty array to specify none. This is used to instruct the agent on how to call the skill.

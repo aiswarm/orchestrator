@@ -13,14 +13,14 @@ export default class GetAgentsAndGroups {
   }
 
   get description() {
-    return 'Returns users and groups. Names are unique and can be used for both'
+    return 'Returns users or groups that you can send messages to. Names are unique across both collections and case sensitive'
   }
 
   get parameters() {
     return {
       name: {
         type: 'string',
-        description: 'The name of the user or group to return. An agent name will return info about the agent, a group name will return all members of that group, no name will return all users and groups'
+        description: 'The name of the user or group to return. An agent name will return info about the agent, a group name will return all members of that group, Leaving this empty will return all users and groups for lookup purposes'
       }
     }
   }

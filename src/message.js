@@ -16,14 +16,15 @@ export default class Message {
   #content
   #type
   #timestamp
-  #status = 'created'
+  #status
 
-  constructor(api, target, source, content, type = Message.stringType) {
+  constructor(api, target, source, content, type = Message.stringType, status = 'created') {
     this.#api = api
     this.#id = Message.#idCounter++
     this.#target = target
     this.#source = source
     this.#content = content
+    this.#status = status
     this.#timestamp = new Date()
     if (typeof type === 'string') {
       switch (type) {
@@ -50,6 +51,7 @@ export default class Message {
 
   set status(status) {
     this.#status = status
+    this.#api.log.debug('Message', this.toString(), 'status changed to', status)
     this.#api.emit('messageUpdated', this)
   }
 

@@ -35,7 +35,8 @@ export default class SendMessage {
   }
 
   execute({target, message, type}, agentName) {
-    if (!this.#api.groups.get(target) && !this.#api.agents.get(target)) {
+    target = target.toLowerCase()
+    if (target !== 'user' && !this.#api.groups.get(target) && !this.#api.agents.get(target)) {
       throw new Error(`Target ${target} is not a valid agent or group`)
     }
     const msg = this.#api.comms.createMessage(

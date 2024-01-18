@@ -1,8 +1,10 @@
 export default class CreateAgent {
   #api
+  #config
 
   constructor({api}) {
     this.#api = api
+    this.#config = api.config.skills.createAgent
   }
 
   get name() {
@@ -10,31 +12,31 @@ export default class CreateAgent {
   }
 
   get description() {
-    return 'Creates a new agent that you can communicate with via sendMessage.'
+    return this.#config.description
   }
 
   get parameters() {
     return {
       name: {
         type: 'string',
-        description: 'The name of the agent to create'
+        description: this.#config.parameters.name
       },
       driver: {
         type: 'string',
-        description: 'The type of driver to use for the agent.',
+        description: this.#config.parameters.driver,
         enum: this.#api.agents.availableDrivers()
       },
       description: {
         type: 'string',
-        description: 'A description of the agent'
+        description: this.#config.parameters.description
       },
       instructions: {
         type: 'string',
-        description: 'Initial Instructions for the agent to follow'
+        description: this.#config.parameters.instructions
       },
       skills: {
         type: 'array',
-        description: 'An array of skills to assign to the agent',
+        description: this.#config.parameters.skills,
         enum: this.#api.skills.list(),
         items: {
           type: 'string'

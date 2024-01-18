@@ -1,8 +1,10 @@
 export default class GetSkillInfo {
   #api
+  #config
 
   constructor({api}) {
     this.#api = api
+    this.#config = api.config.skills.getSkillInfo
   }
 
   get name() {
@@ -10,14 +12,14 @@ export default class GetSkillInfo {
   }
 
   get description() {
-    return 'Returns information about a skill, such as its parameters and description'
+    return this.#config.description
   }
 
   get parameters() {
     return {
       name: {
         type: 'string',
-        description: 'The name of the skill to get information about. Returns all skills if not specified'
+        description: this.#config.parameters.name
       }
     }
   }

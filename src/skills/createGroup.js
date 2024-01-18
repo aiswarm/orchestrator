@@ -1,8 +1,10 @@
 export default class CreateGroup {
   #api
+  #config
 
   constructor({api}) {
     this.#api = api
+    this.#config = api.config.skills.createGroup
   }
 
   get name() {
@@ -10,18 +12,18 @@ export default class CreateGroup {
   }
 
   get description() {
-    return 'Creates a new group that you can send messages to. Agents can be added to the group later.'
+    return this.#config.description
   }
 
   get parameters() {
     return {
       name: {
         type: 'string',
-        description: 'The name of group to create'
+        description: this.#config.parameters.name
       },
       members: {
         type: 'array',
-        description: 'The names of agents to add to the group',
+        description: this.#config.parameters.members,
         items: {
           type: 'string'
         }

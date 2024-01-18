@@ -3,9 +3,11 @@
  */
 export default class GetAgentsAndGroups {
   #api
+  #config
 
   constructor({api}) {
     this.#api = api
+    this.#config = api.config.skills.getAgentsAndGroups
   }
 
   get name() {
@@ -13,14 +15,14 @@ export default class GetAgentsAndGroups {
   }
 
   get description() {
-    return 'Returns users or groups that you can send messages to. Names are unique across both collections and case sensitive'
+    return this.#config.description
   }
 
   get parameters() {
     return {
       name: {
         type: 'string',
-        description: 'The name of the user or group to return. An agent name will return info about the agent, a group name will return all members of that group, Leaving this empty will return all users and groups for lookup purposes'
+        description: this.#config.parameters.name
       }
     }
   }

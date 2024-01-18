@@ -3,9 +3,11 @@
  */
 export default class TimeAndDateSkill {
   #api
+  #config
 
   constructor({api}) {
     this.#api = api
+    this.#config = api.config.skills.getTimeAndDate
   }
 
   get name() {
@@ -13,14 +15,14 @@ export default class TimeAndDateSkill {
   }
 
   get description() {
-    return 'Returns date/time formatted according to the given format'
+    return this.#config.description
   }
 
   get parameters() {
     return {
       format: {
         type: 'string',
-        description: 'Specifies the date/time using UTS#35 date format patterns.'
+        description: this.#config.parameters.format
       }
     }
   }

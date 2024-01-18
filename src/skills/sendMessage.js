@@ -1,8 +1,10 @@
 export default class SendMessage {
   #api
+  #config
 
   constructor({api}) {
     this.#api = api
+    this.#config = api.config.skills.sendMessage
   }
 
   get name() {
@@ -10,22 +12,22 @@ export default class SendMessage {
   }
 
   get description() {
-    return 'Sends a message to a group or agent. For agents to respond you will have to instruct them to use sendMessage, and who to send it to.'
+    return this.#config.description
   }
 
   get parameters() {
     return {
       target: {
         type: 'string',
-        description: 'The name of the target agent or group the message is for'
+        description: this.#config.parameters.target
       },
       message: {
         type: 'string',
-        description: 'The message to send'
+        description: this.#config.parameters.message
       },
       type: {
         type: 'string',
-        description: 'Can be ignored for now, defaults to "string" which is the only format we support at this point.'
+        description: this.#config.parameters.type
       }
     }
   }

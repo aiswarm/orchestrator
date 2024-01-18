@@ -6,7 +6,7 @@ export default class GetSkillInfo {
   }
 
   get name() {
-    return 'getSkillInfo'
+    return 'Get Skill Info'
   }
 
   get description() {

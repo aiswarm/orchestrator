@@ -6,7 +6,7 @@ export default class CreateGroup {
   }
 
   get name() {
-    return 'createGroup'
+    return 'Create Group'
   }
 
   get description() {

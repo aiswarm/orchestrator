@@ -9,7 +9,7 @@ export default class TimeAndDateSkill {
   }
 
   get name() {
-    return 'getTimeAndDate'
+    return 'Get Time/Date'
   }
 
   get description() {

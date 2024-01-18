@@ -6,7 +6,7 @@ export default class SendMessage {
   }
 
   get name() {
-    return 'sendMessage'
+    return 'Send Message'
   }
 
   get description() {

@@ -9,7 +9,7 @@ export default class GetAgentsAndGroups {
   }
 
   get name() {
-    return 'getAgentsAndGroups'
+    return 'Get Agents/Groups'
   }
 
   get description() {

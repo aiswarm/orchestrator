@@ -5,7 +5,7 @@
  * extended via plugins that are added via npm modules. Any modules tagged with the keyword 'ai_so:plugin' will
  * be loaded and initialized automatically. For more information on plugins, see the documentation in the doc folder.
  */
-import logger from 'console-log-level'
+import log from 'loglevel'
 import Config from './config.js'
 import API from '../api.js'
 import plugins from './plugins.js'
@@ -18,11 +18,11 @@ import SendMessage from './skills/sendMessage.js'
 import GetSkillInfo from './skills/getSkillInfo.js'
 
 export async function initialize(configPath, loglevel = 'info') {
-  let log = logger({level: loglevel})
+  log.setLevel(loglevel)
   log.info('Starting AI Swarm Orchestrator')
 
   const config = await Config(configPath, loglevel)
-  let api = API(config, loglevel)
+  let api = API(config, log)
 
   // Add built-in driver(s)
   api.registerAgentDriver('generator', GeneratorDriver)

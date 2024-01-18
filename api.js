@@ -1,4 +1,3 @@
-import logger from 'console-log-level'
 import AgentIndex from './src/agentIndex.js'
 import Communications from './src/comms.js'
 import Groups from './src/groups.js'
@@ -67,12 +66,12 @@ class API extends On {
   /**
    * Creates a new API object.
    * @param {Config} config The configuration object to use.
-   * @param {string} loglevel The log level to use for logging.
+   * @param {Object} log The logger to use for logging.
    */
-  constructor(config, loglevel) {
+  constructor(config, log) {
     super()
     this.#config = config
-    this.#log = logger({level: loglevel})
+    this.#log = log
     this.#groups = new Groups(this)
     this.#comms = new Communications(this)
     this.#agents = new AgentIndex(this)
@@ -202,9 +201,9 @@ let singleton = null
  * This method returns a singleton instance of the API object. It is used to ensure that only one instance of the API
  * object is created. Parameters are passed to the constructor of the API object only when the singleton is created.
  * @param {Config} config The configuration object to use.
- * @param {string} loglevel The log level to use for logging.
+ * @param {Object} log The logger to use for logging.
  * @return {API} The singleton instance of the API object.
  */
-export default function getApi(config, loglevel) {
-  return singleton || (singleton = new API(config, loglevel))
+export default function getApi(config, log) {
+  return singleton || (singleton = new API(config, log))
 }

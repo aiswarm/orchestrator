@@ -1,3 +1,8 @@
+[![npm version](https://badge.fury.io/js/%40aiswarm%2Forchestrator.svg)](https://badge.fury.io/js/%40aiswarm%2Forchestrator)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Downloads](https://img.shields.io/npm/dm/%40aiswarm%2Forchestrator.svg)](https://npmjs.com/package/%40aiswarm%2Forchestrator)
+[![Issues](https://img.shields.io/github/issues-raw/aiswarm/orchestrator)](https://github.com/aiswarm/orchestrator/issues)
+[![Known Vulnerabilities](https://snyk.io/test/github/aiswarm/orchestrator/badge.svg)](https://snyk.io/test/github/aiswarm/orchestrator)
 # AI Swarm - Orchestrator
 
 ## Overview

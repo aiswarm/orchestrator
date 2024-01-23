@@ -30,7 +30,7 @@
  */
 import fs from 'fs'
 import path from 'path'
-import logger from 'console-log-level'
+import log from 'loglevel'
 
 import defaultConfig from './config.default.js'
 
@@ -43,7 +43,7 @@ const defaultPath = path.join(process.cwd(), 'config')
  * @return {Promise<Config>}
  */
 export default async function get(configPath, loglevel) {
-  const log = logger({level: loglevel})
+  log.setLevel(loglevel)
   configPath = findConfig(configPath, log)
   let config = await readConfig(configPath, log)
   applyGlobalConfig(config)

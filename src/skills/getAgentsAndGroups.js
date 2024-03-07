@@ -11,7 +11,7 @@ export default class GetAgentsAndGroups {
   }
 
   get name() {
-    return 'Get Agents/Groups'
+    return 'get_agents_groups'
   }
 
   get description() {

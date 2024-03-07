@@ -56,7 +56,7 @@ const config = {
       }
     },
     sendMessage: {
-      description: 'Sends a message to an agent or group',
+      description: 'Sends a message to an agent or group. Does not receive an answer as response, but only a confirmation that the message was sent. If you want an answer you will have to wait for a new message to be received that the user has passed on from the other agent.',
       parameters: {
         target: 'The name of the agent or group to send the message to',
         message: 'The message to send',

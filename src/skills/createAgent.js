@@ -8,7 +8,7 @@ export default class CreateAgent {
   }
 
   get name() {
-    return 'Create Agent'
+    return 'create_agent'
   }
 
   get description() {

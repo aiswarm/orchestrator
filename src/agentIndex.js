@@ -93,6 +93,7 @@ export default class AgentIndex {
    * @return {Agent} The agent with the given name.
    */
   get(name) {
+    name = name.trim().toLowerCase()
     return this.#agents[name]
   }
 
@@ -128,6 +129,7 @@ export default class AgentIndex {
    * @return {Agent} The agent object.
    */
   create(name, config) {
+    name = name.trim().toLowerCase()
     if (this.#api.groups.get(name)) {
       throw new Error(`Agent ${name} already exists as a group.`)
     }

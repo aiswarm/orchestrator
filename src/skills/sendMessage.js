@@ -8,7 +8,7 @@ export default class SendMessage {
   }
 
   get name() {
-    return 'Send Message'
+    return 'send_message'
   }
 
   get description() {
@@ -48,6 +48,6 @@ export default class SendMessage {
       type
     )
     this.#api.comms.emit(msg)
-    return msg.toObject()
+    return '{success:true}'
   }
 }

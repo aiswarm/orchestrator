@@ -32,6 +32,8 @@ export default class Groups extends On {
    * @fires Groups#updated
    */
   add(name, ...members) {
+    name = name.trim().toLowerCase()
+    members = members.map(member => member.trim().toLowerCase())
     if (this.#api.agents.get(name)) {
       throw new Error(`Group ${name} already exists as an agent.`)
     }
@@ -76,7 +78,7 @@ export default class Groups extends On {
    * @return {String[]} An array of agent names. Returns undefined if the group does not exist.
    */
   get(name) {
-    return this.#api.config.groups[name]
+    return this.#api.config.groups[name.trim().toLowerCase()]
   }
 
   /**
@@ -97,6 +99,7 @@ export default class Groups extends On {
    * @fires Groups#removed
    */
   remove(name) {
+    name = name.trim().toLowerCase()
     if (!this.#api.config.groups[name]) {
       return false
     }

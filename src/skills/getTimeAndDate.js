@@ -11,7 +11,7 @@ export default class TimeAndDateSkill {
   }
 
   get name() {
-    return 'Get Time/Date'
+    return 'get_time_date'
   }
 
   get description() {

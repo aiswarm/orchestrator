@@ -1,3 +1,5 @@
+import On from 'onall'
+
 /**
  * @typedef {Class} AgentSkill
  * @description This is the interface that agent skill functions must implement.
@@ -25,12 +27,13 @@
 /**
  * Manages and executes all available skills. Skills are commands that can be executed by agents.
  */
-export default class Skills {
+export default class Skills extends On {
   #api
   #skills = {}
   #collections = {}
 
   constructor(api) {
+    super()
     this.#api = api
   }
 
@@ -76,13 +79,18 @@ export default class Skills {
   async execute(name, args, agentName) {
     const skill = this.#skills[name]
     if (!skill) {
+      this.emit('skillNotFound', agentName, name)
       throw new Error(`Trying to execute Skill ${name}: not found`)
     }
     try {
-      return await skill.execute(args, agentName)
+      this.emit('skillStarted', agentName, name, args)
+      let result = await skill.execute(args, agentName)
+      this.emit('skillCompleted', agentName, name, result)
+      return result
     } catch (e) {
       this.#api.log.error(`Error executing skill ${name}: ${e.message}`)
       this.#api.log.debug(e)
+      this.emit('skillFailed', agentName, name, e)
       throw new Error(`Error executing skill ${name}: ${e.message}`)
     }
   }

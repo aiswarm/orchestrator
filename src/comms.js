@@ -62,9 +62,10 @@ export default class Communications extends On {
    * @param {string} source The source of the messageInput.
    * @param {string} content The content of the messageInput.
    * @param {Symbol} [type=Message.stringType] The type of the messageInput.
+   * @param {string?} status The status of the messageInput.
    * @return {Message} The newly created messageInput object.
    */
-  createMessage(target, source, content, type = Message.stringType) {
-    return new Message(this.#api, target, source, content, type)
+  createMessage(target, source, content, type = Message.stringType, status) {
+    return new Message(this.#api, target, source, content, type, status)
   }
 }

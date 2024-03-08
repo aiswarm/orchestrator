@@ -7,6 +7,7 @@ export default class Message {
   static imageType = Symbol('image')
   static videoType = Symbol('video')
   static audioType = Symbol('audio')
+  static skillType = Symbol('skill')
   static #idCounter = 1
 
   #api

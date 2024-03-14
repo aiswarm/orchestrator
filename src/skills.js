@@ -79,7 +79,7 @@ export default class Skills extends On {
    */
   async execute(name, args, agentName) {
     const skill = this.#skills[name]
-    const message = this.#api.comms.createMessage(agentName, 'system', name, Message.skillType)
+    const message = this.#api.comms.createMessage(agentName, 'system', name, Message.skillType, 'created', args)
     this.#api.comms.emit(message)
     if (!skill) {
       this.emit('skillNotFound', agentName, name)

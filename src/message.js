@@ -18,14 +18,16 @@ export default class Message {
   #type
   #timestamp
   #status
+  #metadata
 
-  constructor(api, target, source, content, type = Message.stringType, status = 'created') {
+  constructor(api, target, source, content, type = Message.stringType, status = 'created', metadata= {}) {
     this.#api = api
     this.#id = Message.#idCounter++
     this.#target = target
     this.#source = source
     this.#content = content
     this.#status = status
+    this.#metadata = metadata
     this.#timestamp = new Date()
     if (typeof type === 'string') {
       switch (type) {
@@ -80,28 +82,35 @@ export default class Message {
     return this.#type
   }
 
+  get metadata() {
+    return this.#metadata
+  }
+
+  /**
+   * Returns the value of the metadata with the given key.
+   * @param {string} key The key of the metadata to get.
+   * @return {*} The value of the metadata with the given key or undefined if the key does not exist.
+   */
+  getMetadata(key) {
+    return this.#metadata[key]
+  }
+
   /**
    * Returns a locale dependent string representation of the messageInput.
    * @return {string} A string representation of the messageInput.
    */
   toString() {
+    const time = this.timestamp.toLocaleTimeString()
     switch (this.type) {
     case Message.imageType:
-      return `Image ${this.id} from ${this.source} to ${
-        this.target
-      } at ${this.timestamp.toLocaleTimeString()} is ${this.status}`
+      return `Image ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status}`
     case Message.videoType:
-      return `Video ${this.id} from ${this.source} to ${
-        this.target
-      } at ${this.timestamp.toLocaleTimeString()} is ${this.status}`
+      return `Video ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status}`
     case Message.audioType:
-      return `Audio ${this.id} from ${this.source} to ${
-        this.target
-      } at ${this.timestamp.toLocaleTimeString()} is ${this.status}`
+      return `Audio ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status}`
     default:
-      return `Message ${this.id} from ${this.source} to ${
-        this.target
-      } at ${this.timestamp.toLocaleTimeString()} is ${this.status}: ${this.content}`
+      return `Message ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status}: ${this.content}` +
+        this.#metadata ? ` with metadata ${JSON.stringify(this.metadata)}` : ''
     }
   }
 
@@ -110,6 +119,13 @@ export default class Message {
    * @return {Object} An object representation of the messageInput.
    */
   toObject() {
+    const metadata = []
+    for (const key in this.#metadata) {
+      metadata.push({
+        key,
+        value:JSON.stringify(this.#metadata[key])
+      })
+    }
     return {
       id: this.#id,
       source: this.#source,
@@ -117,7 +133,8 @@ export default class Message {
       content: this.#content,
       type: this.#type.toString().slice(7, -1),
       timestamp: this.#timestamp.toISOString(),
-      status: this.#status
+      status: this.#status,
+      metadata
     }
   }
 }

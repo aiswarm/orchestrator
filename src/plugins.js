@@ -38,6 +38,9 @@ export default async function loadPlugins(api) {
 
   for (const packagePath of paths) {
     const packageJson = path.join(packagePath, 'package.json')
+    if (path.basename(packagePath).startsWith('.')) {
+      continue
+    }
     if (!fs.existsSync(packageJson)) {
       api.log.trace(
         `Missing package.json in ${packagePath}. Looking for organization scoped plugins.`
@@ -71,14 +74,22 @@ function getGlobalNodeModulesPath(api) {
   }
 }
 
+const loadedPlugins = new Set()
 async function initialize(api, packageJson) {
   try {
     const packageInfo = JSON.parse(
       fs.readFileSync(packageJson, {encoding: 'utf8'})
     )
+    // Prevent duplicates
+    if (loadedPlugins.has(packageInfo.name)) {
+      api.log.trace(`Skipping ${packageInfo.name} because it has already been loaded.`)
+      return
+    }
+    loadedPlugins.add(packageInfo.name)
+    // Check if the package is a plugin
     if (!packageInfo.keywords?.includes(pluginKeyword)) {
       api.log.trace(
-        `Skipping ${packageInfo.main} because it does not have the ${pluginKeyword} keyword.`
+        `Skipping ${packageInfo.name} because it does not have the ${pluginKeyword} keyword.`
       )
       return
     }

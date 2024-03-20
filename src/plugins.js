@@ -4,46 +4,51 @@
  * objects.
  */
 
+import {execSync} from 'child_process'
 import fs from 'fs'
 import path from 'path'
 
 const nodeModulesPath = path.join(process.cwd(), 'node_modules')
 const pluginKeyword = '@aiswarm:plugin'
 
+
 /**
  * Looks for plugins in the node_modules directory and loads them if they are tagged with the plugin keyword.
  * @param {API} api The api to the swarm orchestration system. A reference to this object will be passed to each plugin.
  */
 export default async function loadPlugins(api) {
-  if (!fs.existsSync(nodeModulesPath)) {
-    throw new Error(
-      'No node_modules directory found. Please run `npm install` to install dependencies.'
-    )
+  let localPackages = []
+  if (fs.existsSync(nodeModulesPath)) {
+    localPackages = fs.readdirSync(nodeModulesPath).map((file) => {
+      return path.join(nodeModulesPath, file)
+    })
+  }
+  let globalPackages = []
+  const globalNodeModulesPath = getGlobalNodeModulesPath(api)
+  if (fs.existsSync(globalNodeModulesPath)) {
+    globalPackages = fs.readdirSync(globalNodeModulesPath).map((file) => {
+      return path.join(globalNodeModulesPath, file)
+    })
   }
 
-  const files = fs.readdirSync(nodeModulesPath)
-  if (files.length === 0) {
-    throw new Error('No plugins found in node_modules directory.')
+  const paths =  [...localPackages, ...globalPackages]
+  if (paths.length === 0) {
+    throw new Error('No plugins found in local or global node_modules directory.')
   }
 
-  for (const file of files) {
-    if (file.startsWith('.')) {
-      api.log.trace(`Skipping ${file} because it starts with a period.`)
-      continue
-    }
-    const pluginPath = path.join(nodeModulesPath, file)
-    const packageJson = path.join(pluginPath, 'package.json')
+  for (const packagePath of paths) {
+    const packageJson = path.join(packagePath, 'package.json')
     if (!fs.existsSync(packageJson)) {
       api.log.trace(
-        `Missing package.json in ${pluginPath}. Looking for organization scoped plugins.`
+        `Missing package.json in ${packagePath}. Looking for organization scoped plugins.`
       )
-      const orgFiles = fs.readdirSync(pluginPath)
+      const orgFiles = fs.readdirSync(packagePath)
       if (orgFiles.length === 0) {
-        api.log.trace(`No organization scoped plugins found in ${pluginPath}.`)
+        api.log.trace(`No organization scoped plugins found in ${packagePath}.`)
         continue
       }
       for (const orgFile of orgFiles) {
-        const orgPluginPath = path.join(pluginPath, orgFile)
+        const orgPluginPath = path.join(packagePath, orgFile)
         const orgPackageJson = path.join(orgPluginPath, 'package.json')
         if (!fs.existsSync(orgPackageJson)) {
           api.log.trace(`Missing package.json in ${orgPluginPath}. Skipping.`)
@@ -55,6 +60,14 @@ export default async function loadPlugins(api) {
     }
 
     await initialize(api, packageJson)
+  }
+}
+
+function getGlobalNodeModulesPath(api) {
+  try {
+    return execSync('npm root -g').toString().trim()
+  } catch (error) {
+    api.log.debug('Error getting global node_modules directory:', error)
   }
 }
 

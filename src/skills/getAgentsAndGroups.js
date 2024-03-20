@@ -57,6 +57,6 @@ export default class GetAgentsAndGroups {
         groups: this.#api.groups.list()
       }
     }
-    return null
+    return 'No agents or groups found' + name ? ` for ${name}.` : '.'
   }
 }

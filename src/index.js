@@ -6,7 +6,7 @@
  * be loaded and initialized automatically. For more information on plugins, see the documentation in the doc folder.
  */
 import log from 'loglevel'
-import Config from './config.js'
+import Config from './configParser.js'
 import API from '../api.js'
 import plugins from './plugins.js'
 import GeneratorDriver from './driver.generator.js'

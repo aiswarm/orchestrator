@@ -1,5 +1,12 @@
 import path from 'path'
-import {applyDrivers, applyGlobalConfig, applyGroups, findConfig, readConfig, validateConfig} from '../src/config.js'
+import {
+  applyDrivers,
+  applyGlobalConfig,
+  applyGroups,
+  findConfig,
+  readConfig,
+  validateConfig
+} from '../src/configParser.js'
 import {jest} from '@jest/globals'
 
 const logOn = false
@@ -14,7 +21,7 @@ const log = {
   error: logFn
 }
 
-describe('config.js', () => {
+describe('configParser.js', () => {
   afterEach(() => {
     jest.resetAllMocks()
   })

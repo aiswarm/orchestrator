@@ -1,6 +1,6 @@
 {
   "name": "@aiswarm/orchestrator",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Organizes a swarm of AI agents to work together",
   "main": "index.js",
   "type": "module",

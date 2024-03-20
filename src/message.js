@@ -54,7 +54,7 @@ export default class Message {
 
   set status(status) {
     this.#status = status
-    this.#api.log.debug('Message', this.toString(), 'status changed to', status)
+    this.#api.log.trace(`Message (${this.content.substring(0, 100)}), status changed to`, status)
     this.#api.emit('messageUpdated', this)
   }
 

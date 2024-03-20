@@ -7,7 +7,7 @@
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --coverage"
   },
-  "author": "Ravi Gairola <mallox@pyxzl.net",
+  "author": "Ravi Gairola <mallox@pyxzl.net>",
   "license": "MIT",
   "dependencies": {
     "loglevel": "^1.8.1",

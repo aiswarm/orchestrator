@@ -1,5 +1,5 @@
 import On from 'onall'
-import Message from './message.js'
+import Message from '../message.js'
 
 /**
  * @typedef {Class} AgentSkill
@@ -79,24 +79,24 @@ export default class Skills extends On {
    */
   async execute(name, args, agentName) {
     const skill = this.#skills[name]
-    const message = this.#api.comms.createMessage(agentName, 'system', name, Message.skillType, 'created', args)
+    const message = this.#api.comms.createMessage(agentName, 'system', name, Message.type.skill, Message.state.created, args)
     this.#api.comms.emit(message)
     if (!skill) {
       this.emit('skillNotFound', agentName, name)
-      message.status = 'notFound'
+      message.status = Message.state.error
       throw new Error(`Trying to execute Skill ${name}: not found`)
     }
     try {
       this.emit('skillStarted', agentName, name, args)
       let result = await skill.execute(args, agentName)
       this.emit('skillCompleted', agentName, name, result)
-      message.status = 'completed'
+      message.status = Message.state.complete
       return result
     } catch (e) {
       this.#api.log.error(`Error executing skill ${name}: ${e.message}`)
       this.#api.log.debug(e)
       this.emit('skillFailed', agentName, name, e)
-      message.status = 'failed'
+      message.status = Message.state.error
 
       throw new Error(`Error executing skill ${name}: ${e.message}`)
     }

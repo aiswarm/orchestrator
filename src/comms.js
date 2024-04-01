@@ -1,6 +1,6 @@
 import On from 'onall'
 import History from './history.js'
-import Message from './message.js'
+import Message from '../message.js'
 
 /**
  * Handles map communications between the different agents, groups, and the user.
@@ -29,7 +29,7 @@ export default class Communications extends On {
    * @property {string} args.target - The target of the messageInput.
    * @param {string} args[0] - The source of the messageInput.
    * @param {string} args[1] - The content of the messageInput.
-   * @param {Message.stringType} args[2] - The type of the messageInput.
+   * @param {Message.type} args[2] - The type of the messageInput.
    * @return {boolean} True if the messageInput was sent successfully.
    */
   emit(event, ...args) {
@@ -61,12 +61,18 @@ export default class Communications extends On {
    * @param {string} target The target of the messageInput.
    * @param {string} source The source of the messageInput.
    * @param {string} content The content of the messageInput.
-   * @param {Symbol} [type=Message.stringType] The type of the messageInput.
-   * @param {string?} status The status of the messageInput.
-   * @param {Object<string, *>} metadata The metadata of the messageInput.
+   * @param {Symbol} [type=Message.type.string] The type of the messageInput.
+   * @param {Symbol} [status=Message.status.created] The status of the messageInput.
+   * @param {Object<string, *>} [metadata={}] The metadata of the messageInput.
    * @return {Message} The newly created messageInput object.
    */
   createMessage(target, source, content, type, status, metadata) {
+    if (type && !Message.type.contains(type)) {
+      throw new Error(`Invalid message type: ${type}`)
+    }
+    if (status && !Message.state.contains(status)) {
+      throw new Error(`Invalid message status: ${status}`)
+    }
     return new Message(this.#api, target, source, content, type, status, metadata)
   }
 }

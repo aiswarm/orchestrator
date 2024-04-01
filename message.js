@@ -3,13 +3,42 @@
  * This is mostly for documentation purposes, and make communication a little easier.
  */
 export default class Message {
-  static stringType = Symbol('string')
-  static imageType = Symbol('image')
-  static videoType = Symbol('video')
-  static audioType = Symbol('audio')
-  static skillType = Symbol('skill')
-  static #idCounter = 1
+  static type = {
+    string: Symbol('string'),
+    image: Symbol('image'),
+    video: Symbol('video'),
+    audio: Symbol('audio'),
+    skill: Symbol('skill'),
 
+    contains: (type) => {
+      for (const key in Message.type) {
+        if (Message.type[key] === type) {
+          return true
+        }
+      }
+      return false
+    }
+  }
+
+  static state = {
+    created: Symbol('created'),
+    queued: Symbol('queued'),
+    processing: Symbol('processing'),
+    complete: Symbol('complete'),
+    cancelled: Symbol('cancelled'),
+    error: Symbol('error'),
+
+    contains: (state) => {
+      for (const key in Message.state) {
+        if (Message.state[key] === state) {
+          return true
+        }
+      }
+      return false
+    }
+  }
+
+  static #idCounter = 1
   #api
   #id
   #target
@@ -20,7 +49,7 @@ export default class Message {
   #status
   #metadata
 
-  constructor(api, target, source, content, type = Message.stringType, status = 'created', metadata= {}) {
+  constructor(api, target, source, content, type = Message.type.string, status = Message.state.created, metadata= {}) {
     this.#api = api
     this.#id = Message.#idCounter++
     this.#target = target
@@ -29,21 +58,8 @@ export default class Message {
     this.#status = status
     this.#metadata = metadata
     this.#timestamp = new Date()
-    if (typeof type === 'string') {
-      switch (type) {
-      case 'image':
-        type = Message.imageType
-        break
-      case 'video':
-        type = Message.videoType
-        break
-      case 'audio':
-        type = Message.audioType
-        break
-      default:
-        type = Message.stringType
-        break
-      }
+    if (!Message.type.contains(type)) {
+      throw new Error(`Invalid message type: ${type}`)
     }
     this.#type = type
   }
@@ -53,9 +69,17 @@ export default class Message {
   }
 
   set status(status) {
+    if (this.#status === status) {
+      return
+    }
+    if (!Message.state.contains(status)) {
+      throw new Error(`Invalid message status: ${status}`)
+    }
     this.#status = status
-    this.#api.log.trace(`Message (${this.content.substring(0, 100)}), status changed to`, status)
-    this.#api.emit('messageUpdated', this)
+    this.#api.log.trace(`Message (${this.content.substring(0, 100)}), status changed to`, status.description)
+    if (status !== Message.state.created) {
+      this.#api.emit('messageUpdated', this)
+    }
   }
 
   get id() {
@@ -102,14 +126,14 @@ export default class Message {
   toString() {
     const time = this.timestamp.toLocaleTimeString()
     switch (this.type) {
-    case Message.imageType:
-      return `Image ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status}`
-    case Message.videoType:
-      return `Video ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status}`
-    case Message.audioType:
-      return `Audio ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status}`
+    case Message.type.image:
+      return `Image ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status.description}`
+    case Message.type.video:
+      return `Video ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status.description}`
+    case Message.type.audio:
+      return `Audio ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status.description}`
     default:
-      return `Message ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status}: ${this.content}` +
+      return `Message ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status.description}: ${this.content}` +
         this.#metadata ? ` with metadata ${JSON.stringify(this.metadata)}` : ''
     }
   }
@@ -133,7 +157,7 @@ export default class Message {
       content: this.#content,
       type: this.#type.toString().slice(7, -1),
       timestamp: this.#timestamp.toISOString(),
-      status: this.#status,
+      status: this.#status.description,
       metadata
     }
   }

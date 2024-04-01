@@ -10,7 +10,7 @@
 
 
 import Communications from './comms.js'
-import Message from './message.js'
+import Message from '../message.js'
 
 /**
  * This class handles map agent related tasks. It has access to the driver and can instruct it. It also handles the communication between the agents and the user.
@@ -38,14 +38,13 @@ export default class Agent {
     this.#driver = index.getAgentDriver(name, config)
     if (this.#driver.instruct) {
       index.api.comms.on(name, async (message) => {
-        if (message.source === name && this.groups.includes(message.target) || message.type === Message.skillType) {
+        if (message.source === name && this.groups.includes(message.target) || message.type === Message.type.skill) {
           return // We get duplicate messages if we're part of the group and sending a message there. To prevent this, we just ignore messages that we send to the group, since they're already on the sender thread.
         }
-        message.status = 'received'
         const response = await this.#driver.instruct(message)
         if (response) {
           if (response instanceof Communications.Message) {
-            response.status = 'processed'
+            response.status = Message.state.processed
             index.api.comms.emit(response)
           } else if (response.trim().length) {
             index.api.comms.emit(message.source, name, response)

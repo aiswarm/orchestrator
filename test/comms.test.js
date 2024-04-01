@@ -32,12 +32,12 @@ describe('Communications', () => {
   })
 
   it('should emit a messageInput correctly', () => {
-    comms.emit('target', 'source', 'content', Communications.Message.videoType)
+    comms.emit('target', 'source', 'content', Communications.Message.type.video)
     const message = comms.history.all()[0]
     expect(message.target).toBe('target')
     expect(message.source).toBe('source')
     expect(message.content).toBe('content')
-    expect(message.type).toBe(Communications.Message.videoType)
+    expect(message.type).toBe(Communications.Message.type.video)
   })
 
   it('should add a messageInput correctly', () => {

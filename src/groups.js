@@ -78,6 +78,9 @@ export default class Groups extends On {
    * @return {String[]} An array of agent names. Returns undefined if the group does not exist.
    */
   get(name) {
+    if (!name || typeof name !== 'string') {
+      return undefined
+    }
     return this.#api.config.groups[name.trim().toLowerCase()]
   }
 

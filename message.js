@@ -110,6 +110,11 @@ export default class Message {
     return this.#metadata
   }
 
+  append(content)  {
+    this.#content += content
+    this.#api.emit('messageUpdated', this)
+  }
+
   /**
    * Returns the value of the metadata with the given key.
    * @param {string} key The key of the metadata to get.

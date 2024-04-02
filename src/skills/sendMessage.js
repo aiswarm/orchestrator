@@ -41,6 +41,9 @@ export default class SendMessage {
     if (target !== 'user' && !this.#api.groups.get(target) && !this.#api.agents.get(target)) {
       throw new Error(`Target ${target} is not a valid agent or group`)
     }
+    if (target === agentName) {
+      throw new Error('Cannot send a message to yourself')
+    }
     const msg = this.#api.comms.createMessage(
       target,
       agentName,

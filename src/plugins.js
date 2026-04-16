@@ -8,8 +8,25 @@ import {execSync} from 'child_process'
 import fs from 'fs'
 import path from 'path'
 
-const nodeModulesPath = path.join(process.cwd(), 'node_modules')
 const pluginKeyword = '@aiswarm:plugin'
+
+/**
+ * Returns all candidate node_modules directories to scan: cwd and every ancestor up to root.
+ * This lets plugins be discovered in npm-workspace setups where deps are hoisted above cwd.
+ * @return {string[]}
+ */
+function getNodeModulesSearchPaths() {
+  const paths = []
+  let dir = process.cwd()
+  for (let i = 0; i < 10; i++) {
+    const candidate = path.join(dir, 'node_modules')
+    if (fs.existsSync(candidate)) paths.push(candidate)
+    const parent = path.dirname(dir)
+    if (parent === dir) break
+    dir = parent
+  }
+  return paths
+}
 
 
 /**
@@ -18,10 +35,10 @@ const pluginKeyword = '@aiswarm:plugin'
  */
 export default async function loadPlugins(api) {
   let localPackages = []
-  if (fs.existsSync(nodeModulesPath)) {
-    localPackages = fs.readdirSync(nodeModulesPath).map((file) => {
-      return path.join(nodeModulesPath, file)
-    })
+  for (const nodeModulesPath of getNodeModulesSearchPaths()) {
+    for (const file of fs.readdirSync(nodeModulesPath)) {
+      localPackages.push(path.join(nodeModulesPath, file))
+    }
   }
   let globalPackages = []
   const globalNodeModulesPath = getGlobalNodeModulesPath(api)

@@ -44,13 +44,94 @@ const defaultPath = path.join(process.cwd(), 'config')
  */
 export default async function get(configPath, loglevel) {
   log.setLevel(loglevel)
+  await loadEnvFiles(log)
   configPath = findConfig(configPath, log)
   let config = await readConfig(configPath, log)
+  expandEnvVars(config, log)
   applyGlobalConfig(config)
   applyDrivers(config)
   applyGroups(config)
   validateConfig(config, log)
   return config
+}
+
+/**
+ * Loads .env files from cwd, walking up to find one. Uses `dotenv` if it is installed; otherwise parses a minimal subset.
+ * Already-set process.env values win.
+ * @param {Logger} log
+ */
+async function loadEnvFiles(log) {
+  const candidates = []
+  let dir = process.cwd()
+  for (let i = 0; i < 5; i++) {
+    candidates.push(path.join(dir, '.env'))
+    const parent = path.dirname(dir)
+    if (parent === dir) break
+    dir = parent
+  }
+  for (const envPath of candidates) {
+    if (!fs.existsSync(envPath)) continue
+    log.debug(`Loading env from ${envPath}`)
+    try {
+      const dotenv = await import('dotenv')
+      dotenv.config({path: envPath, override: false})
+    } catch {
+      // Fallback minimal parser: KEY=VALUE per line, ignore blanks and comments, optional surrounding quotes.
+      const text = fs.readFileSync(envPath, 'utf8')
+      for (const line of text.split(/\r?\n/)) {
+        const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/)
+        if (!m || line.trim().startsWith('#')) continue
+        let value = m[2]
+        if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith('\'') && value.endsWith('\''))) {
+          value = value.slice(1, -1)
+        }
+        if (process.env[m[1]] === undefined) process.env[m[1]] = value
+      }
+    }
+    break // stop at first .env found
+  }
+}
+
+/**
+ * Recursively substitutes ${VAR} and $VAR tokens in all string values of the config with process.env values.
+ * Unknown variables are left untouched and logged as warnings.
+ * @param {any} node The config node being walked (object mutated in place).
+ * @param {Logger} log
+ */
+export function expandEnvVars(node, log) {
+  if (node == null) return
+  if (typeof node === 'string') return // strings are handled by the parent setter
+  if (Array.isArray(node)) {
+    for (let i = 0; i < node.length; i++) {
+      if (typeof node[i] === 'string') {
+        node[i] = substituteString(node[i], log)
+      } else {
+        expandEnvVars(node[i], log)
+      }
+    }
+    return
+  }
+  if (typeof node === 'object') {
+    for (const key of Object.keys(node)) {
+      const value = node[key]
+      if (typeof value === 'string') {
+        node[key] = substituteString(value, log)
+      } else {
+        expandEnvVars(value, log)
+      }
+    }
+  }
+}
+
+function substituteString(value, log) {
+  return value.replace(/\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)/g, (match, a, b) => {
+    const name = a || b
+    if (Object.prototype.hasOwnProperty.call(process.env, name)) {
+      return process.env[name]
+    }
+    log.warn(`Config references undefined environment variable ${name}`)
+    return match
+  })
 }
 
 /**

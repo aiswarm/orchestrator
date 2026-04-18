@@ -31,7 +31,6 @@
 import fs from 'fs'
 import path from 'path'
 import log from 'loglevel'
-
 import defaultConfig from './config.default.js'
 
 const defaultPath = path.join(process.cwd(), 'config')
@@ -66,26 +65,37 @@ async function loadEnvFiles(log) {
   for (let i = 0; i < 5; i++) {
     candidates.push(path.join(dir, '.env'))
     const parent = path.dirname(dir)
-    if (parent === dir) break
+    if (parent === dir) {
+      break
+    }
     dir = parent
   }
   for (const envPath of candidates) {
-    if (!fs.existsSync(envPath)) continue
+    if (!fs.existsSync(envPath)) {
+      continue
+    }
     log.debug(`Loading env from ${envPath}`)
     try {
       const dotenv = await import('dotenv')
-      dotenv.config({path: envPath, override: false})
+      dotenv.config({ path: envPath, override: false })
     } catch {
       // Fallback minimal parser: KEY=VALUE per line, ignore blanks and comments, optional surrounding quotes.
       const text = fs.readFileSync(envPath, 'utf8')
       for (const line of text.split(/\r?\n/)) {
         const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/)
-        if (!m || line.trim().startsWith('#')) continue
+        if (!m || line.trim().startsWith('#')) {
+          continue
+        }
         let value = m[2]
-        if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith('\'') && value.endsWith('\''))) {
+        if (
+          (value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'"))
+        ) {
           value = value.slice(1, -1)
         }
-        if (process.env[m[1]] === undefined) process.env[m[1]] = value
+        if (process.env[m[1]] === undefined) {
+          process.env[m[1]] = value
+        }
       }
     }
     break // stop at first .env found
@@ -99,8 +109,12 @@ async function loadEnvFiles(log) {
  * @param {Logger} log
  */
 export function expandEnvVars(node, log) {
-  if (node == null) return
-  if (typeof node === 'string') return // strings are handled by the parent setter
+  if (node == null) {
+    return
+  }
+  if (typeof node === 'string') {
+    return
+  } // strings are handled by the parent setter
   if (Array.isArray(node)) {
     for (let i = 0; i < node.length; i++) {
       if (typeof node[i] === 'string') {
@@ -124,14 +138,17 @@ export function expandEnvVars(node, log) {
 }
 
 function substituteString(value, log) {
-  return value.replace(/\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)/g, (match, a, b) => {
-    const name = a || b
-    if (Object.prototype.hasOwnProperty.call(process.env, name)) {
-      return process.env[name]
+  return value.replace(
+    /\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)/g,
+    (match, a, b) => {
+      const name = a || b
+      if (Object.prototype.hasOwnProperty.call(process.env, name)) {
+        return process.env[name]
+      }
+      log.warn(`Config references undefined environment variable ${name}`)
+      return match
     }
-    log.warn(`Config references undefined environment variable ${name}`)
-    return match
-  })
+  )
 }
 
 /**
@@ -159,9 +176,7 @@ export function findConfig(configPath, log) {
       return path.resolve(pathWithExtension)
     }
   }
-  log.debug(
-    `No file or directory found at config path, using default path ${defaultPath}`
-  )
+  log.debug(`No file or directory found at config path, using default path ${defaultPath}`)
   return defaultPath
 }
 
@@ -217,7 +232,7 @@ export async function readConfigDirectory(configPath) {
  */
 export async function readConfigFile(configPath) {
   if (configPath.endsWith('.json')) {
-    return JSON.parse(fs.readFileSync(configPath, {encoding: 'utf8'}))
+    return JSON.parse(fs.readFileSync(configPath, { encoding: 'utf8' }))
   }
   const module = await import(configPath)
   return module.default || module
@@ -230,7 +245,10 @@ export async function readConfigFile(configPath) {
 export function applyGlobalConfig(config) {
   if (config.global?.agents) {
     for (let agentName in config.agents) {
-      config.agents[agentName] = deepMerge(deepMerge({}, config.global.agents), config.agents[agentName])
+      config.agents[agentName] = deepMerge(
+        deepMerge({}, config.global.agents),
+        config.agents[agentName]
+      )
     }
   }
 }
@@ -240,13 +258,13 @@ export function applyGlobalConfig(config) {
  * @param {Config} config The configuration object as it was read from the file system.
  */
 export function applyDrivers(config) {
-  const {drivers, agents} = config
+  const { drivers, agents } = config
   if (drivers) {
     for (const agentName in agents) {
       const agentDriver = agents[agentName].driver
       const driverConfig = drivers[agentDriver.type]
       if (driverConfig) {
-        agents[agentName].driver = {...driverConfig, ...agentDriver}
+        agents[agentName].driver = { ...driverConfig, ...agentDriver }
       }
     }
   }
@@ -327,15 +345,14 @@ function deepMerge(...sources) {
       for (const key in source) {
         if (source[key] instanceof Object) {
           if (!target[key]) {
-            Object.assign(target, {[key]: {}})
+            Object.assign(target, { [key]: {} })
           }
           target[key] = deepMerge(target[key], source[key])
         } else {
-          Object.assign(target, {[key]: source[key]})
+          Object.assign(target, { [key]: source[key] })
         }
       }
     }
   }
   return target
-
 }

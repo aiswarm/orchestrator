@@ -1,7 +1,7 @@
+import On from 'onall'
 import AgentIndex from './src/agentIndex.js'
 import Communications from './src/comms.js'
 import Groups from './src/groups.js'
-import On from 'onall'
 import Skills from './src/skills.js'
 
 /**

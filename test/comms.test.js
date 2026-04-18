@@ -1,5 +1,5 @@
+import { jest } from '@jest/globals'
 import Communications from '../src/comms.js'
-import {jest} from '@jest/globals'
 
 describe('Communications', () => {
   let api, comms

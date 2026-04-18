@@ -41,9 +41,7 @@ export default class Groups extends On {
       members = members[0]
     }
     if (this.#api.config.groups[name]) {
-      this.#api.config.groups[name] = [
-        ...new Set([...this.#api.config.groups[name], ...members])
-      ]
+      this.#api.config.groups[name] = [...new Set([...this.#api.config.groups[name], ...members])]
       /**
        * @event Groups#updated
        * @type {string} The name of the group.

@@ -2,7 +2,7 @@ export default class CreateAgent {
   #api
   #config
 
-  constructor({api}) {
+  constructor({ api }) {
     this.#api = api
     this.#config = api.config.skills.createAgent
   }
@@ -49,7 +49,7 @@ export default class CreateAgent {
     return ['name', 'driver']
   }
 
-  execute({name, driver, description, instructions, skills}) {
+  execute({ name, driver, description, instructions, skills }) {
     if (this.#api.agents.get(name)) {
       return `Agent ${name} already exists`
     }

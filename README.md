@@ -3,6 +3,7 @@
 [![Downloads](https://img.shields.io/npm/dm/%40aiswarm%2Forchestrator.svg)](https://npmjs.com/package/%40aiswarm%2Forchestrator)
 [![Issues](https://img.shields.io/github/issues-raw/aiswarm/orchestrator)](https://github.com/aiswarm/orchestrator/issues)
 [![Known Vulnerabilities](https://snyk.io/test/github/aiswarm/orchestrator/badge.svg)](https://snyk.io/test/github/aiswarm/orchestrator)
+
 # AI Swarm - Orchestrator
 
 ## Overview
@@ -15,7 +16,7 @@ If you're looking for an easy way to get started with the AI Swarm, check out th
 
 ## Getting Started
 
-This project is split into multiple packages that are loaded as plugins by the orchestrator.  This allows developers to choose which plugins they want to use and to create their own plugins based on the examples provided here. The goal is to provide a basic functionality that can be extended by the community.
+This project is split into multiple packages that are loaded as plugins by the orchestrator. This allows developers to choose which plugins they want to use and to create their own plugins based on the examples provided here. The goal is to provide a basic functionality that can be extended by the community.
 
 Once published you can find the plugins on npm with the `@aiswarm:plugin` keyword. Installed plugins are automatically loaded by the orchestrator when they're installed.
 

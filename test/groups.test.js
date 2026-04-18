@@ -1,6 +1,6 @@
-import API from '../api'
-import Groups from '../src/groups'
-import {jest} from '@jest/globals'
+import { jest } from '@jest/globals'
+import API from '../api.js'
+import Groups from '../src/groups.js'
 
 const config = {
   groups: {}
@@ -9,9 +9,8 @@ const config = {
 const loglevel = 'error'
 
 describe('Groups', () => {
-
   // Creating a new group with a name and members adds the group to the configuration and emits a 'created' event.
-  it('should add group to configuration and emit \'created\' event', () => {
+  it("should add group to configuration and emit 'created' event", () => {
     const api = new API(config, loglevel)
     const groups = new Groups(api)
     const mockEmit = jest.spyOn(groups, 'emit')
@@ -26,9 +25,9 @@ describe('Groups', () => {
   })
 
   // Adding members to an existing group updates the configuration and emits an 'updated' event.
-  it('should update group configuration and emit \'updated\' event', () => {
+  it("should update group configuration and emit 'updated' event", () => {
     const initialMembers = ['agent1', 'agent2']
-    const api = new API({...config, groups: {group1: initialMembers}}, loglevel)
+    const api = new API({ ...config, groups: { group1: initialMembers } }, loglevel)
     const groups = new Groups(api)
     const mockEmit = jest.spyOn(groups, 'emit')
     const groupName = 'group1'
@@ -43,7 +42,7 @@ describe('Groups', () => {
   })
 
   // Removing an existing group removes it from the configuration and emits a 'removed' event.
-  it('should remove group from configuration and emit \'removed\' event', () => {
+  it("should remove group from configuration and emit 'removed' event", () => {
     const api = new API(config, loglevel)
     const groups = new Groups(api)
     const mockEmit = jest.spyOn(groups, 'emit')
@@ -107,5 +106,4 @@ describe('Groups', () => {
     expect(result).toBe(true)
     expect(api.config.groups[groupName]).toEqual([])
   })
-
 })

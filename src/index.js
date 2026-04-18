@@ -6,8 +6,8 @@
  * be loaded and initialized automatically. For more information on plugins, see the documentation in the doc folder.
  */
 import log from 'loglevel'
-import Config from './configParser.js'
 import API from '../api.js'
+import Config from './configParser.js'
 import plugins from './plugins.js'
 import GeneratorDriver from './driver.generator.js'
 import TimeAndDateSkill from './skills/getTimeAndDate.js'
@@ -34,7 +34,10 @@ export async function initialize(configPath, loglevel = 'info') {
   api.registerAgentSkill(TimeAndDateSkill)
   api.registerAgentSkill(GetAgentsAndGroups)
   api.registerAgentSkill(SendMessage)
-  api.skills.addSkillCollection('core', api.skills.list().filter(skill => skill !== 'createAgent'))
+  api.skills.addSkillCollection(
+    'core',
+    api.skills.list().filter(skill => skill !== 'createAgent')
+  )
 
   // Load 3rd party plugins
   await plugins(api)
@@ -43,7 +46,7 @@ export async function initialize(configPath, loglevel = 'info') {
   api.agents.initialize()
 
   return {
-    run: (prompt) => {
+    run: prompt => {
       api.agents.run(prompt)
     }
   }

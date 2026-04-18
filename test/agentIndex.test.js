@@ -1,10 +1,9 @@
+import { jest } from '@jest/globals'
 import AgentIndex from '../src/agentIndex.js'
 import Agent from '../src/agent.js'
-import {jest} from '@jest/globals'
 
 // Add a driver to the agentIndex
 class Driver {
-
   constructor(api, name, config) {
     this.config = config
   }
@@ -79,16 +78,16 @@ describe('AgentIndex', () => {
   it('should add an agent correctly', () => {
     agentIndex.registerDriver('driver1', Driver)
 
-    const agent = agentIndex.create('agent1', {driver: {type: 'driver1'}})
+    const agent = agentIndex.create('agent1', { driver: { type: 'driver1' } })
     expect(agent).toBeInstanceOf(Agent)
     expect(agent.driver).toBeInstanceOf(Driver)
-    expect(agent.driver.config).toEqual({type: 'driver1'})
+    expect(agent.driver.config).toEqual({ type: 'driver1' })
   })
 
   it('should register a driver and get an agent driver correctly', () => {
     agentIndex.registerDriver('driver1', Driver)
 
-    const driver = agentIndex.getAgentDriver('agent1', {type: 'driver1'})
+    const driver = agentIndex.getAgentDriver('agent1', { type: 'driver1' })
     expect(driver).toBeInstanceOf(Driver)
   })
 })

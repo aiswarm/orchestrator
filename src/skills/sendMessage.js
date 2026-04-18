@@ -2,7 +2,7 @@ export default class SendMessage {
   #api
   #config
 
-  constructor({api}) {
+  constructor({ api }) {
     this.#api = api
     this.#config = api.config.skills.sendMessage
   }
@@ -36,7 +36,7 @@ export default class SendMessage {
     return ['target', 'message']
   }
 
-  execute({target, message, type}, agentName) {
+  execute({ target, message, type }, agentName) {
     target = target.toLowerCase()
     if (target !== 'user' && !this.#api.groups.get(target) && !this.#api.agents.get(target)) {
       throw new Error(`Target ${target} is not a valid agent or group`)
@@ -44,12 +44,7 @@ export default class SendMessage {
     if (target === agentName) {
       throw new Error('Cannot send a message to yourself')
     }
-    const msg = this.#api.comms.createMessage(
-      target,
-      agentName,
-      message,
-      type
-    )
+    const msg = this.#api.comms.createMessage(target, agentName, message, type)
     this.#api.comms.emit(msg)
     return '{success:true}'
   }

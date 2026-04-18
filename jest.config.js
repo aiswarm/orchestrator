@@ -6,8 +6,5 @@ export default {
   transform: {
     '^.+\\.m?jsx?$': 'babel-jest'
   },
-  transformIgnorePatterns: [
-    '/node_modules/(?!(@aiswarm)/)',
-    '/node_modules/(?!onall).+\\.js$'
-  ]
+  transformIgnorePatterns: ['/node_modules/(?!(@aiswarm)/)', '/node_modules/(?!onall).+.js$']
 }

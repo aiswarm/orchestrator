@@ -4,7 +4,7 @@
  * objects.
  */
 
-import {execSync} from 'child_process'
+import { execSync } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 
@@ -20,14 +20,17 @@ function getNodeModulesSearchPaths() {
   let dir = process.cwd()
   for (let i = 0; i < 10; i++) {
     const candidate = path.join(dir, 'node_modules')
-    if (fs.existsSync(candidate)) paths.push(candidate)
+    if (fs.existsSync(candidate)) {
+      paths.push(candidate)
+    }
     const parent = path.dirname(dir)
-    if (parent === dir) break
+    if (parent === dir) {
+      break
+    }
     dir = parent
   }
   return paths
 }
-
 
 /**
  * Looks for plugins in the node_modules directory and loads them if they are tagged with the plugin keyword.
@@ -43,12 +46,12 @@ export default async function loadPlugins(api) {
   let globalPackages = []
   const globalNodeModulesPath = getGlobalNodeModulesPath(api)
   if (fs.existsSync(globalNodeModulesPath)) {
-    globalPackages = fs.readdirSync(globalNodeModulesPath).map((file) => {
+    globalPackages = fs.readdirSync(globalNodeModulesPath).map(file => {
       return path.join(globalNodeModulesPath, file)
     })
   }
 
-  const paths =  [...localPackages, ...globalPackages]
+  const paths = [...localPackages, ...globalPackages]
   if (paths.length === 0) {
     throw new Error('No plugins found in local or global node_modules directory.')
   }
@@ -94,9 +97,7 @@ function getGlobalNodeModulesPath(api) {
 const loadedPlugins = new Set()
 async function initialize(api, packageJson) {
   try {
-    const packageInfo = JSON.parse(
-      fs.readFileSync(packageJson, {encoding: 'utf8'})
-    )
+    const packageInfo = JSON.parse(fs.readFileSync(packageJson, { encoding: 'utf8' }))
     // Prevent duplicates
     if (loadedPlugins.has(packageInfo.name)) {
       api.log.trace(`Skipping ${packageInfo.name} because it has already been loaded.`)
@@ -128,9 +129,7 @@ async function initialize(api, packageJson) {
       module.default(api)
       api.log.debug(`Loaded plugin ${packageInfo.name}.`)
     } else {
-      api.log.error(
-        `Plugin ${packageInfo.name} does not have an initialize or default function.`
-      )
+      api.log.error(`Plugin ${packageInfo.name} does not have an initialize or default function.`)
     }
   } catch (e) {
     const packageName = path.basename(path.dirname(packageJson))

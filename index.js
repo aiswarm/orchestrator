@@ -1,1 +1,1 @@
-export {initialize} from './src/index.js'
+export { initialize } from './src/index.js'

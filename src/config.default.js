@@ -31,14 +31,16 @@ const config = {
       }
     },
     createGroup: {
-      description: 'Creates a new group that you can send messages to. Agents can be added to the group later.',
+      description:
+        'Creates a new group that you can send messages to. Agents can be added to the group later.',
       parameters: {
         name: 'The name of group to create',
         members: 'The names of agents to add to the group'
       }
     },
     getAgentsAndGroups: {
-      description: 'Returns users or groups that you can send messages to. Names are unique across both collections and case sensitive',
+      description:
+        'Returns users or groups that you can send messages to. Names are unique across both collections and case sensitive',
       parameters: {
         name: 'The name of the user or group to return. An agent name will return info about the agent, a group name will return all members of that group, Leaving this empty will return all users and groups for lookup purposes'
       }
@@ -56,7 +58,8 @@ const config = {
       }
     },
     sendMessage: {
-      description: 'Sends a message to an agent or group. Does not receive an answer as response, but only a confirmation that the message was sent. If you want an answer you will have to wait for a new message to be received that the user has passed on from the other agent.',
+      description:
+        'Sends a message to an agent or group. Does not receive an answer as response, but only a confirmation that the message was sent. If you want an answer you will have to wait for a new message to be received that the user has passed on from the other agent.',
       parameters: {
         target: 'The name of the agent or group to send the message to',
         message: 'The message to send',

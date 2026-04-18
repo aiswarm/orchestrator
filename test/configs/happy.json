@@ -5,11 +5,7 @@
     }
   },
   "groups": {
-    "pit-crew": [
-      "mechanic",
-      "engineer",
-      "tyre-changer"
-    ]
+    "pit-crew": ["mechanic", "engineer", "tyre-changer"]
   },
   "agents": {
     "driver": {

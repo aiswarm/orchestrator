@@ -1,4 +1,5 @@
 import path from 'path'
+import { jest } from '@jest/globals'
 import {
   applyDrivers,
   applyGlobalConfig,
@@ -7,12 +8,10 @@ import {
   readConfig,
   validateConfig
 } from '../src/configParser.js'
-import {jest} from '@jest/globals'
 
 const logOn = false
 // eslint-disable-next-line no-console
-const logFn = logOn ? console.log : () => {
-}
+const logFn = logOn ? console.log : () => {}
 const log = {
   trace: logFn,
   debug: logFn,

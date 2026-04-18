@@ -1,6 +1,6 @@
 import On from 'onall'
-import History from './history.js'
 import Message from '../message.js'
+import History from './history.js'
 
 /**
  * Handles map communications between the different agents, groups, and the user.

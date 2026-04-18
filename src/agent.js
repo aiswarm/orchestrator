@@ -8,9 +8,8 @@
  * @property {DriverConfig} driver The driver to use for this agent.
  */
 
-
-import Communications from './comms.js'
 import Message from '../message.js'
+import Communications from './comms.js'
 
 /**
  * This class handles map agent related tasks. It has access to the driver and can instruct it. It also handles the communication between the agents and the user.
@@ -37,8 +36,11 @@ export default class Agent {
     this.#expandSkillCollections(config)
     this.#driver = index.getAgentDriver(name, config)
     if (this.#driver.instruct) {
-      index.api.comms.on(name, async (message) => {
-        if (message.source === name && this.groups.includes(message.target) || message.type === Message.type.skill) {
+      index.api.comms.on(name, async message => {
+        if (
+          (message.source === name && this.groups.includes(message.target)) ||
+          message.type === Message.type.skill
+        ) {
           return // We get duplicate messages if we're part of the group and sending a message there. To prevent this, we just ignore messages that we send to the group, since they're already on the sender thread.
         }
         const response = await this.#driver.instruct(message)
@@ -53,7 +55,7 @@ export default class Agent {
       })
     }
     this.#interval = setInterval(() => {
-      if(this.#status !== this.#driver.status) {
+      if (this.#status !== this.#driver.status) {
         this.#status = this.#driver.status
         this.#api.emit('agentUpdated', this)
       }
@@ -124,4 +126,3 @@ export default class Agent {
     }
   }
 }
-

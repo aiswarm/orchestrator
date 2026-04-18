@@ -43,7 +43,7 @@ export default class Skills extends On {
    * @param {Class<AgentSkill>} skill The skill to add.
    */
   add(skill) {
-    const skillInstance = new (skill)({
+    const skillInstance = new skill({
       api: this.#api
     })
     this.#skills[skillInstance.name] = skillInstance
@@ -79,7 +79,14 @@ export default class Skills extends On {
    */
   async execute(name, args, agentName) {
     const skill = this.#skills[name]
-    const message = this.#api.comms.createMessage(agentName, 'system', name, Message.type.skill, Message.state.created, args)
+    const message = this.#api.comms.createMessage(
+      agentName,
+      'system',
+      name,
+      Message.type.skill,
+      Message.state.created,
+      args
+    )
     this.#api.comms.emit(message)
     if (!skill) {
       this.emit('skillNotFound', agentName, name)

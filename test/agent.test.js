@@ -1,5 +1,5 @@
+import { jest } from '@jest/globals'
 import Agent from '../src/agent.js'
-import {jest} from '@jest/globals'
 
 describe('Agent', () => {
   let agent

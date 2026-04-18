@@ -2,7 +2,7 @@ export default class CreateGroup {
   #api
   #config
 
-  constructor({api}) {
+  constructor({ api }) {
     this.#api = api
     this.#config = api.config.skills.createGroup
   }
@@ -35,7 +35,7 @@ export default class CreateGroup {
     return ['name']
   }
 
-  execute({name, members}) {
+  execute({ name, members }) {
     if (this.#api.groups.get(name)) {
       return `Group ${name} already exists`
     }

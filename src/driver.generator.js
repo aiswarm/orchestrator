@@ -17,13 +17,16 @@ export default class GeneratorDriver {
    * @param {string} name The name of the agent for which this driver is running.
    * @param {AgentConfig} config The configuration object for this driver.
    */
-  constructor({api, name, config}) {
+  constructor({ api, name, config }) {
     this.#api = api
     this.#agentName = name
     this.#config = config
-    setTimeout(() => {
-      this.resume()
-    }, Math.random() * (this.#config.interval || 5000))
+    setTimeout(
+      () => {
+        this.resume()
+      },
+      Math.random() * (this.#config.interval || 5000)
+    )
     api.log.debug('Created Generator driver for agent', name)
     api.log.trace('Generator driver config:', config)
   }
@@ -67,9 +70,7 @@ export default class GeneratorDriver {
       if (!to) {
         const candidates = [
           ...this.#api.groups.list(),
-          ...Object.keys(this.#api.agents.all()).filter(
-            (name) => name !== from
-          )
+          ...Object.keys(this.#api.agents.all()).filter(name => name !== from)
         ]
         to = candidates[Math.floor(Math.random() * candidates.length)]
       }

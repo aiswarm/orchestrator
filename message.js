@@ -1,4 +1,3 @@
-
 /**
  * This is mostly for documentation purposes, and make communication a little easier.
  */
@@ -10,7 +9,7 @@ export default class Message {
     audio: Symbol('audio'),
     skill: Symbol('skill'),
 
-    contains: (type) => {
+    contains: type => {
       for (const key in Message.type) {
         if (Message.type[key] === type) {
           return true
@@ -28,7 +27,7 @@ export default class Message {
     cancelled: Symbol('cancelled'),
     error: Symbol('error'),
 
-    contains: (state) => {
+    contains: state => {
       for (const key in Message.state) {
         if (Message.state[key] === state) {
           return true
@@ -49,7 +48,15 @@ export default class Message {
   #status
   #metadata
 
-  constructor(api, target, source, content, type = Message.type.string, status = Message.state.created, metadata= {}) {
+  constructor(
+    api,
+    target,
+    source,
+    content,
+    type = Message.type.string,
+    status = Message.state.created,
+    metadata = {}
+  ) {
     this.#api = api
     this.#id = Message.#idCounter++
     this.#target = target
@@ -76,7 +83,10 @@ export default class Message {
       throw new Error(`Invalid message status: ${status}`)
     }
     this.#status = status
-    this.#api.log.trace(`Message (${this.content.substring(0, 100)}), status changed to`, status.description)
+    this.#api.log.trace(
+      `Message (${this.content.substring(0, 100)}), status changed to`,
+      status.description
+    )
     if (status !== Message.state.created) {
       this.#api.emit('messageUpdated', this)
     }
@@ -110,7 +120,7 @@ export default class Message {
     return this.#metadata
   }
 
-  append(content)  {
+  append(content) {
     this.#content += content
     this.#api.emit('messageUpdated', this)
   }
@@ -131,15 +141,17 @@ export default class Message {
   toString() {
     const time = this.timestamp.toLocaleTimeString()
     switch (this.type) {
-    case Message.type.image:
-      return `Image ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status.description}`
-    case Message.type.video:
-      return `Video ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status.description}`
-    case Message.type.audio:
-      return `Audio ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status.description}`
-    default:
-      return `Message ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status.description}: ${this.content}` +
-        this.#metadata ? ` with metadata ${JSON.stringify(this.metadata)}` : ''
+      case Message.type.image:
+        return `Image ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status.description}`
+      case Message.type.video:
+        return `Video ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status.description}`
+      case Message.type.audio:
+        return `Audio ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status.description}`
+      default:
+        return `Message ${this.id} from ${this.source} to ${this.target} at ${time} is ${this.status.description}: ${this.content}` +
+          this.#metadata
+          ? ` with metadata ${JSON.stringify(this.metadata)}`
+          : ''
     }
   }
 
@@ -152,7 +164,7 @@ export default class Message {
     for (const key in this.#metadata) {
       metadata.push({
         key,
-        value:JSON.stringify(this.#metadata[key])
+        value: JSON.stringify(this.#metadata[key])
       })
     }
     return {

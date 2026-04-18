@@ -12,7 +12,8 @@ export default class AgentIndex {
   /** @type {Object.<string, Class<AgentDriver>>} */
   #drivers = {}
   /** @type {Object<string, Class<AgentSkill>>} */
-  #skills= {}
+  // eslint-disable-next-line no-unused-private-class-members -- registered via api.registerAgentSkill, read by skills manager
+  #skills = {}
 
   /**
    * @param {API} api
@@ -71,7 +72,6 @@ export default class AgentIndex {
       this.#api.comms.emit(message)
     }
   }
-
 
   pause() {
     for (let agentName in this.#agents) {

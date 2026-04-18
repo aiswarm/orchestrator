@@ -33,18 +33,12 @@ export default class History {
         this.#all.shift()
       }
       for (const entry in this.#byTarget) {
-        while (
-          this.#byTarget[entry].length >
-          this.#api.config.comms.history.limits.individual
-        ) {
+        while (this.#byTarget[entry].length > this.#api.config.comms.history.limits.individual) {
           this.#byTarget[entry].shift()
         }
       }
       for (const entry in this.#bySource) {
-        while (
-          this.#bySource[entry].length >
-          this.#api.config.comms.history.limits.individual
-        ) {
+        while (this.#bySource[entry].length > this.#api.config.comms.history.limits.individual) {
           this.#bySource[entry].shift()
         }
       }

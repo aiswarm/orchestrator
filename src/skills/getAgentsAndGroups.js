@@ -5,7 +5,7 @@ export default class GetAgentsAndGroups {
   #api
   #config
 
-  constructor({api}) {
+  constructor({ api }) {
     this.#api = api
     this.#config = api.config.skills.getAgentsAndGroups
   }
@@ -31,7 +31,7 @@ export default class GetAgentsAndGroups {
     return []
   }
 
-  execute({name}) {
+  execute({ name }) {
     if (name && name.trim().length) {
       const agent = this.#api.agents.get(name)
       if (agent) {

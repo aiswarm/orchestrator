@@ -2,7 +2,7 @@ export default class GetSkillInfo {
   #api
   #config
 
-  constructor({api}) {
+  constructor({ api }) {
     this.#api = api
     this.#config = api.config.skills.getSkillInfo
   }
@@ -28,7 +28,7 @@ export default class GetSkillInfo {
     return []
   }
 
-  execute({name}) {
+  execute({ name }) {
     if (name) {
       const skill = this.#api.skills.get(name)
       if (!skill) {
@@ -43,7 +43,7 @@ export default class GetSkillInfo {
     }
 
     const skills = this.#api.skills.list()
-    return skills.map((skillName) => {
+    return skills.map(skillName => {
       const skill = this.#api.skills.get(skillName)
       return {
         name: skill.name,

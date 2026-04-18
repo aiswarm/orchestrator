@@ -1,8 +1,11 @@
-export default class CreateGroup {
+import AgentSkill from '../../agentSkill.js'
+
+export default class CreateGroup extends AgentSkill {
   #api
   #config
 
   constructor({ api }) {
+    super()
     this.#api = api
     this.#config = api.config.skills.createGroup
   }

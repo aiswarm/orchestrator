@@ -1,3 +1,5 @@
+import AgentDriver from '../agentDriver.js'
+
 /**
  * @typedef {Object} GeneratorConfig
  * @property {number} [interval=5000] The interval in milliseconds at which to send messages.
@@ -5,22 +7,23 @@
  * @property {string} [content] The content of the message to send. Defaults to a generic message with from/to info.
  */
 
-export default class GeneratorDriver {
+export default class GeneratorDriver extends AgentDriver {
+  static type = 'generator'
+
   #interval
   #config
   #api
   #agentName
 
   /**
-   * Creates a new OpenAI driver.
-   * @param {API} api The API object that allows to interact with the system.
-   * @param {string} name The name of the agent for which this driver is running.
-   * @param {AgentConfig} config The configuration object for this driver.
+   * @param {AgentDriverOptions} options
+   * @param {GeneratorConfig} options.driverConfig Generator-specific settings.
    */
-  constructor({ api, name, config }) {
+  constructor({ api, name, driverConfig }) {
+    super()
     this.#api = api
     this.#agentName = name
-    this.#config = config
+    this.#config = driverConfig ?? {}
     setTimeout(
       () => {
         this.resume()
@@ -28,24 +31,7 @@ export default class GeneratorDriver {
       Math.random() * (this.#config.interval || 5000)
     )
     api.log.debug('Created Generator driver for agent', name)
-    api.log.trace('Generator driver config:', config)
-  }
-
-  /**
-   * Returns the type of the driver which is 'openai'.
-   * @override
-   * @return {string}
-   */
-  get type() {
-    return 'generator'
-  }
-
-  /**
-   * Returns the configuration object for this driver.
-   * @return {GeneratorConfig}
-   */
-  get config() {
-    return this.#config
+    api.log.trace('Generator driver config:', this.#config)
   }
 
   instruct(message) {

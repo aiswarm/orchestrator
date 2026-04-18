@@ -25,7 +25,7 @@ export async function initialize(configPath, loglevel = 'info') {
   let api = API(config, log)
 
   // Add built-in driver(s)
-  api.registerAgentDriver('generator', GeneratorDriver)
+  api.registerAgentDriver(GeneratorDriver)
 
   // Add built-in skills
   api.registerAgentSkill(CreateAgent)

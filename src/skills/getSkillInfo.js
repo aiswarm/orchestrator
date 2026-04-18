@@ -1,8 +1,11 @@
-export default class GetSkillInfo {
+import AgentSkill from '../../agentSkill.js'
+
+export default class GetSkillInfo extends AgentSkill {
   #api
   #config
 
   constructor({ api }) {
+    super()
     this.#api = api
     this.#config = api.config.skills.getSkillInfo
   }

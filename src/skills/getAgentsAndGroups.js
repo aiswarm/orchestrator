@@ -1,11 +1,11 @@
-/**
- * @type {AgentSkill} TimeAndDateSkill
- */
-export default class GetAgentsAndGroups {
+import AgentSkill from '../../agentSkill.js'
+
+export default class GetAgentsAndGroups extends AgentSkill {
   #api
   #config
 
   constructor({ api }) {
+    super()
     this.#api = api
     this.#config = api.config.skills.getAgentsAndGroups
   }

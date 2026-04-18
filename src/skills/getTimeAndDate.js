@@ -1,12 +1,12 @@
-/**
- * @type {AgentSkill} TimeAndDateSkill
- */
-export default class TimeAndDateSkill {
+import AgentSkill from '../../agentSkill.js'
+
+export default class TimeAndDateSkill extends AgentSkill {
   // eslint-disable-next-line no-unused-private-class-members -- kept for future use; other skills read api during execute
   #api
   #config
 
   constructor({ api }) {
+    super()
     this.#api = api
     this.#config = api.config.skills.getTimeAndDate
   }

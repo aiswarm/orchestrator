@@ -8,23 +8,12 @@
  */
 
 /**
- * @typedef {Class} Config
+ * @typedef {Object} Config
  * @description This is main structure of the configuration object. It includes many sub-objects that are used to
  * configure the system.
  * @property {Object} global The global configuration object. Settings here will be applied to map settings of their respective groups.
  * @property {AgentConfig} global.agents The global agent configuration object. Settings here will be applied to map agents.
- * @property {DriverConfig} drivers The driver configuration object. Keys are driver types, values are driver configuration objects.
- * @property {Object.<string, string[]>} groups Groups of agents, keys are group names, values are lists of agent names or types.
- * @property {Object.<string, AgentConfig>} agents Agents to add on startup, keys are agent names, values are agent configuration objects.
- */
-
-/**
- * @typedef {Class} Config
- * @description This is main structure of the configuration object. It includes many sub-objects that are used to
- * configure the system.
- * @property {Object} global The global configuration object. Settings here will be applied to map settings of their respective groups.
- * @property {AgentConfig} global.agents The global agent configuration object. Settings here will be applied to map agents.
- * @property {DriverConfig} drivers The driver configuration object. Keys are driver types, values are driver configuration objects.
+ * @property {Object.<string, DriverConfig>} drivers The driver configuration object. Keys are driver types, values are driver configuration objects.
  * @property {Object.<string, string[]>} groups Groups of agents, keys are group names, values are lists of agent names or types.
  * @property {Object.<string, AgentConfig>} agents Agents to add on startup, keys are agent names, values are agent configuration objects.
  */

@@ -3,6 +3,7 @@ import AgentIndex from './src/agentIndex.js'
 import Communications from './src/comms.js'
 import Groups from './src/groups.js'
 import Skills from './src/skills.js'
+import { assertValidDriver } from './src/validators.js'
 
 /**
  * @typedef {Object} Logger
@@ -14,31 +15,19 @@ import Skills from './src/skills.js'
  */
 
 /**
- * @typedef {function} LogFunction
+ * @callback LogFunction
  * @param {string} message
  * @param {...any} args
  */
 
 /**
- * @typedef {Class} AgentDriver
- * @description This is the interface that map drivers must implement.
- * @property {function} constructor The constructor for the driver. It will be passed the configuration object.
- * @property {string} type The type of the driver as unique identifier.\
- * @property {DriverConfig} config The configuration object for this driver.
- * @property {function} initialize This method is used to initialize the driver.
- * @property {function} pause This method is used to pause the driver.
- * @property {function} resume This method is used to resume the driver.
- * @property {string} status The status of the driver.
- * @property {function} instruct This method is used to send a message to the driver.
- */
-
-/**
- * @typedef {Class} DriverConfig
+ * @typedef {Object} DriverConfig
  * @description This is the interface that map driver configuration objects must implement.
  * @property {string} type The type of the driver as unique identifier.
- * @property {string} [instructions] The initial set of instructions to use for the assistant.
- * @property {string[]} [skills] The skills assigned to the assistant.
  */
+
+/** @typedef {typeof import('./agentDriver.js').default} AgentDriverClass */
+/** @typedef {typeof import('./agentSkill.js').default} AgentSkillClass */
 
 /**
  * @emits {config} Emitted when setting the configuration.
@@ -165,19 +154,26 @@ class API extends On {
   }
 
   /**
-   * This method is used to register a driver class by type.
-   * @param {string} type The type of the driver to register.
-   * @param {Class<AgentDriver>} driver
+   * Register a driver class. The driver's `static type` field is the registry key.
+   * @param {AgentDriverClass} driver
+   * @throws {TypeError} If the class fails {@link assertValidDriver}.
+   * @throws {Error} If another driver is already registered with the same type.
    */
-  registerAgentDriver(type, driver) {
-    this.#agents.registerDriver(type, driver)
+  registerAgentDriver(driver) {
+    assertValidDriver(driver, this.#agents.availableDrivers())
+    const type = driver.type
+    this.#agents.registerDriver(driver)
+    this.#config.drivers ??= {}
     this.#config.drivers[type] ??= {}
     this.emit('agentDriverRegistered', type, driver)
   }
 
   /**
-   * This method is used to register a skill.
-   * @param {Class<AgentSkill>} skill
+   * Register a skill class. The class is instantiated immediately with `new SkillClass({api})`
+   * and the instance is validated against the skill contract.
+   * @param {AgentSkillClass} skill The skill class.
+   * @throws {TypeError} If the constructed instance fails the skill contract.
+   * @throws {Error} If another skill with the same name is already registered.
    */
   registerAgentSkill(skill) {
     this.#skills.add(skill)

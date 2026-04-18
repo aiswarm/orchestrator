@@ -1,5 +1,8 @@
 import Agent from './agent.js'
 
+/** @typedef {typeof import('../agentDriver.js').default} AgentDriverClass */
+/** @typedef {typeof import('../agentSkill.js').default} AgentSkillClass */
+
 export default class AgentIndex {
   /** @type {API} */
   #api = null
@@ -9,9 +12,9 @@ export default class AgentIndex {
   #agentsByDriver = {}
   /** @type {Agent[]} */
   #agentsWithEntryPoints = []
-  /** @type {Object.<string, Class<AgentDriver>>} */
+  /** @type {Object.<string, AgentDriverClass>} */
   #drivers = {}
-  /** @type {Object<string, Class<AgentSkill>>} */
+  /** @type {Object.<string, AgentSkillClass>} */
   // eslint-disable-next-line no-unused-private-class-members -- registered via api.registerAgentSkill, read by skills manager
   #skills = {}
 
@@ -148,34 +151,45 @@ export default class AgentIndex {
   }
 
   /**
-   * This method is used to register a driver class by type.
-   * @param {string} type The type of the driver to register.
-   * @param {Class} driver
+   * Register a driver class. The class's {@link AgentDriver.type} is used as the registry key.
+   * Validation is performed by {@link API#registerAgentDriver} before this is called.
+   * @param {AgentDriverClass} driver
    */
-  registerDriver(type, driver) {
+  registerDriver(driver) {
+    const type = driver.type
     this.#api.log.debug(`Registering driver with type ${type}.`)
     this.#drivers[type] = driver
   }
 
   /**
-   * This method is used to get a driver object by name. Drivers are passed a number of parameters as an object.
-   *  @param {string} name The name of the agent for which to get the driver.
-   *  @param {AgentConfig} config The configuration object for the driver.\
+   * Returns a driver instance for an agent. Drivers receive the full agent config plus
+   * a `driverConfig` shortcut to the provider-specific section (`agentConfig.driver`).
+   * @param {string} name The name of the agent for which to get the driver.
+   * @param {AgentConfig} agentConfig The full agent configuration object.
+   * @return {AgentDriver}
+   * @throws {Error} If no driver is registered for the requested type, or the driver constructor throws.
    */
-  getAgentDriver(name, config) {
-    const type = config.driver.type
+  getAgentDriver(name, agentConfig) {
+    const driverConfig = agentConfig.driver
+    const type = driverConfig?.type
+    const DriverClass = this.#drivers[type]
+    if (!DriverClass) {
+      throw new Error(
+        `No driver registered for type "${type}" (agent "${name}"). ` +
+          `Available drivers: ${this.availableDrivers().join(', ') || '(none)'}.`
+      )
+    }
     try {
-      return new this.#drivers[type]({
+      return new DriverClass({
         api: this.#api,
         index: this,
         name,
-        config, // defaults to agent config
-        agentConfig: config, // convenience alias for developers
-        driverConfig: config.driver // convenience alias for developers
+        agentConfig,
+        driverConfig
       })
     } catch (e) {
       this.#api.log.error(e.message, e.stack)
-      throw new Error(`Driver ${type} for agent ${name} not found.`)
+      throw new Error(`Driver "${type}" failed to construct for agent "${name}": ${e.message}`)
     }
   }
 

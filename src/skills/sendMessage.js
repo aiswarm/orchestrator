@@ -1,8 +1,11 @@
-export default class SendMessage {
+import AgentSkill from '../../agentSkill.js'
+
+export default class SendMessage extends AgentSkill {
   #api
   #config
 
   constructor({ api }) {
+    super()
     this.#api = api
     this.#config = api.config.skills.sendMessage
   }

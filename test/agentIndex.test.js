@@ -4,14 +4,20 @@ import Agent from '../src/agent.js'
 
 // Add a driver to the agentIndex
 class Driver {
-  constructor(api, name, config) {
-    this.config = config
+  static type = 'driver1'
+
+  constructor({ agentConfig, driverConfig }) {
+    this.agentConfig = agentConfig
+    this.driverConfig = driverConfig
   }
 
   instruct(name, prompt) {
     this.name = name
     this.prompt = prompt
   }
+
+  pause() {}
+  resume() {}
 }
 
 describe('AgentIndex', () => {
@@ -47,7 +53,7 @@ describe('AgentIndex', () => {
       resume: jest.fn()
     }
     agentIndex = new AgentIndex(api)
-    agentIndex.registerDriver('driver1', Driver)
+    agentIndex.registerDriver(Driver)
   })
 
   it('should add an instance of AgentIndex', () => {
@@ -76,18 +82,19 @@ describe('AgentIndex', () => {
   })
 
   it('should add an agent correctly', () => {
-    agentIndex.registerDriver('driver1', Driver)
+    agentIndex.registerDriver(Driver)
 
     const agent = agentIndex.create('agent1', { driver: { type: 'driver1' } })
     expect(agent).toBeInstanceOf(Agent)
     expect(agent.driver).toBeInstanceOf(Driver)
-    expect(agent.driver.config).toEqual({ type: 'driver1' })
+    expect(agent.driver.driverConfig).toEqual({ type: 'driver1' })
+    expect(agent.driver.agentConfig).toMatchObject({ driver: { type: 'driver1' }, skills: [] })
   })
 
   it('should register a driver and get an agent driver correctly', () => {
-    agentIndex.registerDriver('driver1', Driver)
+    agentIndex.registerDriver(Driver)
 
-    const driver = agentIndex.getAgentDriver('agent1', { type: 'driver1' })
+    const driver = agentIndex.getAgentDriver('agent1', { driver: { type: 'driver1' } })
     expect(driver).toBeInstanceOf(Driver)
   })
 })

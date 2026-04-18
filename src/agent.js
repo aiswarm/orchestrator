@@ -1,10 +1,11 @@
 /**
  * @typedef {Object} AgentConfig
- * @description This is the interface that map agent configuration objects must implement.
+ * @description The per-agent configuration as written in the user's config file.
  * @property {string} instructions The initial set of instructions to use for the assistant.
  * @property {string} [description] The description of the agent.
  * @property {string[]} [skills=[]] The skills assigned to the assistant.
- * @property {boolean} [entrypoint = false] Whether this agent is an entry point or not.
+ * @property {string[]} [groups] The groups this agent belongs to.
+ * @property {boolean} [entrypoint=false] Whether this agent is an entry point or not.
  * @property {DriverConfig} driver The driver to use for this agent.
  */
 

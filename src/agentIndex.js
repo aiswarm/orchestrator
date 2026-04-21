@@ -189,7 +189,9 @@ export default class AgentIndex {
       })
     } catch (e) {
       this.#api.log.error(e.message, e.stack)
-      throw new Error(`Driver "${type}" failed to construct for agent "${name}": ${e.message}`)
+      throw new Error(`Driver "${type}" failed to construct for agent "${name}": ${e.message}`, {
+        cause: e
+      })
     }
   }
 

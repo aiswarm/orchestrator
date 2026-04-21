@@ -89,7 +89,7 @@ export default class Skills extends On {
       this.emit('skillFailed', agentName, name, e)
       message.status = Message.state.error
 
-      throw new Error(`Error executing skill ${name}: ${e.message}`)
+      throw new Error(`Error executing skill ${name}: ${e.message}`, { cause: e })
     }
   }
 }

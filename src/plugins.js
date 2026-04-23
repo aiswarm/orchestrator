@@ -35,6 +35,7 @@ function getNodeModulesSearchPaths() {
 /**
  * Looks for plugins in the node_modules directory and loads them if they are tagged with the plugin keyword.
  * @param {API} api The api to the swarm orchestration system. A reference to this object will be passed to each plugin.
+ * @fires API#pluginsLoaded
  */
 export default async function loadPlugins(api) {
   let localPackages = []
@@ -84,6 +85,8 @@ export default async function loadPlugins(api) {
 
     await initialize(api, packageJson)
   }
+
+  await api.emitAsync('pluginsLoaded')
 }
 
 function getGlobalNodeModulesPath(api) {
@@ -123,10 +126,10 @@ async function initialize(api, packageJson) {
     process.emitWarning = originalEmitWarning
 
     if (typeof module.initialize === 'function') {
-      module.initialize(api)
+      await module.initialize(api)
       api.log.debug(`Loaded plugin ${packageInfo.name}.`)
-    } else if (module.default === 'function') {
-      module.default(api)
+    } else if (typeof module.default === 'function') {
+      await module.default(api)
       api.log.debug(`Loaded plugin ${packageInfo.name}.`)
     } else {
       api.log.error(`Plugin ${packageInfo.name} does not have an initialize or default function.`)

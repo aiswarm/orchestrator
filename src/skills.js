@@ -1,8 +1,8 @@
 import On from 'onall'
-import Message from '../message.js'
+import Message from './message.js'
 import { assertValidSkill, assertValidSkillClass } from './validators.js'
 
-/** @typedef {typeof import('../agentSkill.js').default} AgentSkillClass */
+/** @typedef {typeof import('./agentSkill.js').default} AgentSkillClass */
 
 /**
  * Manages and executes all available skills. Skills are commands that can be executed by agents.

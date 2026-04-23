@@ -1,5 +1,6 @@
-import AgentDriver from '../agentDriver.js'
-import AgentSkill from '../agentSkill.js'
+import AgentDriver from '../src/agentDriver.js'
+import AgentSkill from '../src/agentSkill.js'
+import ContextProvider from '../src/contextProvider.js'
 import {
   assertValidDriver,
   assertValidSkill,
@@ -185,55 +186,87 @@ describe('assertValidSkill', () => {
 })
 
 describe('assertValidContextProvider', () => {
-  const goodProvider = () => ({
-    name: 'rag',
-    dependsOn: [],
-    contribute: async () => ({})
-  })
+  class GoodProvider extends ContextProvider {
+    get name() {
+      return 'rag'
+    }
+    async contribute() {}
+  }
+  const goodProvider = () => new GoodProvider()
 
   it('accepts a well-formed provider', () => {
     expect(() => assertValidContextProvider(goodProvider())).not.toThrow()
   })
 
-  it('treats dependsOn as optional', () => {
-    const p = goodProvider()
-    delete p.dependsOn
-    expect(() => assertValidContextProvider(p)).not.toThrow()
+  it('treats dependsOn as optional (defaults to [])', () => {
+    class NoDeps extends ContextProvider {
+      get name() {
+        return 'nodeps'
+      }
+      async contribute() {}
+    }
+    expect(() => assertValidContextProvider(new NoDeps())).not.toThrow()
   })
 
-  it('rejects non-objects', () => {
-    expect(() => assertValidContextProvider(null)).toThrow(/expects a provider/)
-    expect(() => assertValidContextProvider('rag')).toThrow(/expects a provider/)
+  it('rejects non-instances', () => {
+    expect(() => assertValidContextProvider(null)).toThrow(/extends ContextProvider/)
+    expect(() => assertValidContextProvider('rag')).toThrow(/extends ContextProvider/)
+    expect(() =>
+      assertValidContextProvider({ name: 'rag', dependsOn: [], contribute() {} })
+    ).toThrow(/extends ContextProvider/)
   })
 
-  it('rejects missing name', () => {
-    const p = goodProvider()
-    delete p.name
-    expect(() => assertValidContextProvider(p)).toThrow(/missing required "name"/)
+  it('rejects providers that do not override get name()', () => {
+    class NoName extends ContextProvider {
+      async contribute() {}
+    }
+    /* The abstract getter throws when accessed; assertValidContextProvider surfaces that. */
+    expect(() => assertValidContextProvider(new NoName())).toThrow(/get name/)
   })
 
   it('rejects invalid name format', () => {
-    const p = goodProvider()
-    p.name = 'RAG'
-    expect(() => assertValidContextProvider(p)).toThrow(/lower-kebab-case/)
+    class BadName extends ContextProvider {
+      get name() {
+        return 'RAG'
+      }
+      async contribute() {}
+    }
+    expect(() => assertValidContextProvider(new BadName())).toThrow(/lower-kebab-case/)
   })
 
   it('rejects non-array dependsOn', () => {
-    const p = goodProvider()
-    p.dependsOn = 'rag'
-    expect(() => assertValidContextProvider(p)).toThrow(/invalid "dependsOn"/)
+    class BadDeps extends ContextProvider {
+      get name() {
+        return 'rag'
+      }
+      get dependsOn() {
+        return 'rag'
+      }
+      async contribute() {}
+    }
+    expect(() => assertValidContextProvider(new BadDeps())).toThrow(/invalid "dependsOn"/)
   })
 
   it('rejects non-string entries in dependsOn', () => {
-    const p = goodProvider()
-    p.dependsOn = ['valid', 42]
-    expect(() => assertValidContextProvider(p)).toThrow(/invalid entry in "dependsOn"/)
+    class BadDeps extends ContextProvider {
+      get name() {
+        return 'rag'
+      }
+      get dependsOn() {
+        return ['valid', 42]
+      }
+      async contribute() {}
+    }
+    expect(() => assertValidContextProvider(new BadDeps())).toThrow(/invalid entry in "dependsOn"/)
   })
 
-  it('rejects missing contribute method', () => {
-    const p = goodProvider()
-    delete p.contribute
-    expect(() => assertValidContextProvider(p)).toThrow(/missing required "contribute"/)
+  it('rejects providers that do not override contribute', () => {
+    class NoContribute extends ContextProvider {
+      get name() {
+        return 'rag'
+      }
+    }
+    expect(() => assertValidContextProvider(new NoContribute())).toThrow(/abstract "contribute"/)
   })
 
   it('rejects duplicate names', () => {

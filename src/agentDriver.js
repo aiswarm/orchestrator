@@ -1,4 +1,11 @@
 /**
+ * @typedef {Object} DriverConfig
+ * @description Driver-specific configuration object. Plugin packages SHOULD extend this typedef
+ *   with their own provider-specific fields (model, apiKey, baseUrl, …).
+ * @property {string} type The driver's unique type identifier (matches `static type` on the driver class).
+ */
+
+/**
  * @typedef {Object} AgentDriverOptions
  * @description Constructor argument shape for any class extending {@link AgentDriver}. The kernel
  *   builds this object in {@link AgentIndex#getAgentDriver} and hands it to the driver class.
@@ -23,7 +30,7 @@
  *
  * @abstract
  */
-import { assertKebabCase } from './src/formatChecks.js'
+import { assertKebabCase } from './formatChecks.js'
 
 export default class AgentDriver {
   /**

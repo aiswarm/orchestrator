@@ -26,8 +26,9 @@
  * so each surface picks one and sticks with it.
  */
 
-import AgentDriver from '../agentDriver.js'
-import AgentSkill from '../agentSkill.js'
+import AgentDriver from './agentDriver.js'
+import AgentSkill from './agentSkill.js'
+import ContextProvider from './contextProvider.js'
 import { assertKebabCase, assertSnakeCase } from './formatChecks.js'
 
 /**
@@ -139,49 +140,84 @@ export function assertValidSkillClass(Class) {
 
 /**
  * Assert that `provider` is a valid context provider per the context-provider contract.
- * Context providers do not yet have a base class, so this remains a structural check.
+ * Requires the instance to extend {@link ContextProvider}.
  * @param {*} provider The instance passed to api.registerContextProvider.
  * @param {string[]} [existingNames] Already-registered provider names, for collision detection.
- * @throws {TypeError} If the provider is missing the required shape.
+ * @throws {TypeError} If the provider does not extend ContextProvider or has invalid shape.
  * @throws {Error} If the name collides with an already-registered provider.
  */
 export function assertValidContextProvider(provider, existingNames = []) {
-  if (provider == null || typeof provider !== 'object') {
+  if (!(provider instanceof ContextProvider)) {
     throw new TypeError(
-      'registerContextProvider expects a provider instance, got ' +
-        (provider === null ? 'null' : typeof provider) +
-        '.'
+      'registerContextProvider expects an instance of ContextProvider. ' +
+        'Add `extends ContextProvider` to the class declaration and call `super()` from the constructor.'
     )
   }
   if (typeof provider.name !== 'string' || !provider.name) {
     throw new TypeError(
-      'Context provider is missing required "name" property. See doc/context-provider-contract.md §2.'
+      `Context provider ${provider.constructor.name} must override get name() to return a non-empty string. ` +
+        'See doc/context-provider-contract.md §2.'
     )
   }
   assertKebabCase(provider.name, `Context provider name`)
-  if (provider.dependsOn != null && !Array.isArray(provider.dependsOn)) {
+  if (!Array.isArray(provider.dependsOn)) {
     throw new TypeError(
       `Context provider "${provider.name}" has invalid "dependsOn": expected string[], got ${typeof provider.dependsOn}.`
     )
   }
-  if (Array.isArray(provider.dependsOn)) {
-    for (const dep of provider.dependsOn) {
-      if (typeof dep !== 'string' || !dep) {
-        throw new TypeError(
-          `Context provider "${provider.name}" has invalid entry in "dependsOn": expected non-empty string, got ${typeof dep}.`
-        )
-      }
+  for (const dep of provider.dependsOn) {
+    if (typeof dep !== 'string' || !dep) {
+      throw new TypeError(
+        `Context provider "${provider.name}" has invalid entry in "dependsOn": expected non-empty string, got ${typeof dep}.`
+      )
     }
   }
-  if (typeof provider.contribute !== 'function') {
+  if (provider.contribute === ContextProvider.prototype.contribute) {
     throw new TypeError(
-      `Context provider "${provider.name}" is missing required "contribute" method. See doc/context-provider-contract.md §4.`
+      `Context provider "${provider.name}" must override the abstract "contribute" method. ` +
+        'See doc/context-provider-contract.md §4.'
     )
   }
   if (existingNames.includes(provider.name)) {
     throw new Error(
       `Context provider name "${provider.name}" is already registered. ` +
         'Two plugins tried to register the same context provider name.'
+    )
+  }
+}
+
+/**
+ * Validate the value returned from `provider.contribute()` for one turn.
+ * Runs in the per-turn hot path, so this is intentionally cheap.
+ *
+ * @param {string} providerName Used in error messages.
+ * @param {*} contribution Whatever `contribute()` returned (non-null).
+ * @throws {TypeError} If `contribution` violates the Contribution contract.
+ */
+export function assertValidContribution(providerName, contribution) {
+  if (typeof contribution !== 'object' || Array.isArray(contribution)) {
+    throw new TypeError(
+      `Context provider "${providerName}" returned ${Array.isArray(contribution) ? 'an array' : typeof contribution} from contribute(); expected a Contribution object.`
+    )
+  }
+  if ('systemContext' in contribution && typeof contribution.systemContext !== 'string') {
+    throw new TypeError(
+      `Context provider "${providerName}" returned invalid "systemContext": expected string, got ${typeof contribution.systemContext}.`
+    )
+  }
+  if ('userContext' in contribution && typeof contribution.userContext !== 'string') {
+    throw new TypeError(
+      `Context provider "${providerName}" returned invalid "userContext": expected string, got ${typeof contribution.userContext}.`
+    )
+  }
+  if (
+    'metadata' in contribution &&
+    (contribution.metadata === null ||
+      typeof contribution.metadata !== 'object' ||
+      Array.isArray(contribution.metadata))
+  ) {
+    throw new TypeError(
+      `Context provider "${providerName}" returned invalid "metadata": expected plain object, got ${Array.isArray(contribution.metadata) ? 'array' : typeof contribution.metadata}.`
     )
   }
 }

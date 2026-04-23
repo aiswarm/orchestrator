@@ -292,17 +292,17 @@ message.context = {
   entries: [
     {
       name: 'rag',
-      systemAdditions: '<text>',         // optional
-      messageAdditions: [/* MessagePart[] */], // optional, see §12
-      metadata: { /* free-form */ }      // optional, opaque to the driver
+      systemContext: '<text>',         // optional
+      userContext: '<text>',           // optional, prepended to the user message
+      metadata: { /* free-form */ }    // optional, opaque to the driver
     },
-    { name: 'memory', systemAdditions: '...', metadata: {...} }
+    { name: 'memory', systemContext: '...', metadata: {...} }
     // ... more entries
   ]
 }
 ```
 
-- `entries` is **ordered**: topological order over provider `dependsOn` declarations, ties broken by the agent's `context: [...]` config-list order. The order is deterministic across runs given the same config and provider set.
+- `entries` is **ordered**: topological order over provider `dependsOn` declarations, ties broken by the agent's `contexts: [...]` config-list order. The order is deterministic across runs given the same config and provider set.
 - Each entry is contributed by exactly one provider, identified by `name`.
 - `entries` is append-only by design — no provider can rewrite or remove another's contribution. The driver sees the complete record of what was contributed.
 - `message.context` may be `undefined` (no providers configured for this agent) or `{ entries: [] }` (configured but produced nothing). Drivers MUST handle both.
@@ -311,9 +311,9 @@ message.context = {
 
 The driver decides **how** to fit the contributions into the provider's context window. The `name` field lets a driver apply per-source rendering when it cares to:
 
-- **Default behavior.** Concatenate `entries[*].systemAdditions` in order and put the result in the provider's system slot.
+- **Default behavior.** Concatenate `entries[*].systemContext` in order and prepend the result to the agent's base system prompt; concatenate `entries[*].userContext` in order and prepend the result to the outbound user message. Context frames the agent's primary content in both slots.
 - **Provider-aware optimization.** A driver MAY treat specific entry names specially — e.g. the Anthropic driver puts the long `rag` entry in the _cached_ portion of `system` while keeping the small `memory` entry uncached. The driver knows nothing about what `rag` _means_ — it only knows its provider's caching shape.
-- **Multimodal entries.** When `messageAdditions` is present, the driver treats those parts the same way it treats the inbound message's parts (§12).
+- **Multimodal entries.** When `userContext` is present, the driver prepends it to the outbound user message as text. (Message content is currently string-only; if a future Message shape carries multi-part content, drivers and the Contribution typedef should grow together.)
 - **Unknown names are not special.** A driver MUST NOT skip an entry just because it doesn't recognize the name. Unknown names get the default treatment.
 
 `metadata` is opaque to the driver and exists for provider↔provider communication (e.g. RAG records its source paths so memory can dedupe). Drivers SHOULD pass it through to UI/transport observers via the events in §11 but MUST NOT make routing decisions based on it.

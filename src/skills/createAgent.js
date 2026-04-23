@@ -1,4 +1,4 @@
-import AgentSkill from '../../agentSkill.js'
+import AgentSkill from '../agentSkill.js'
 
 export default class CreateAgent extends AgentSkill {
   #api

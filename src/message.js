@@ -47,6 +47,7 @@ export default class Message {
   #timestamp
   #status
   #metadata
+  #context = undefined
 
   constructor(
     api,
@@ -118,6 +119,41 @@ export default class Message {
 
   get metadata() {
     return this.#metadata
+  }
+
+  /**
+   * Per-turn context contributions assembled by the registered
+   * {@link ContextProvider}s and attached before the driver sees this
+   * message (see [doc/context-provider-contract.md](../doc/context-provider-contract.md)).
+   * Always pertains to the OUTGOING request — the kernel prepends
+   * `entries[*].systemContext` to the system prompt and prepends
+   * `entries[*].userContext` to the user message; `entries[*].metadata`
+   * is opaque to the driver and surfaced on `agentTurnCompleted` for
+   * observability.
+   *
+   * Returns `undefined` until the agent loop assigns a value, which it
+   * only does when the target agent has a non-empty `contexts: [...]`
+   * opt-in list. Once assigned, the value is `{entries: ContextEntry[]}`
+   * (the array may be empty when every provider returned no contribution).
+   *
+   * @return {{entries: import('./contextProviders.js').ContextEntry[]}|undefined}
+   */
+  get context() {
+    return this.#context
+  }
+
+  /**
+   * Set once by the agent loop. Immutable thereafter.
+   * @param {{entries: import('./contextProviders.js').ContextEntry[]}} value
+   * @throws {Error} If `context` has already been assigned on this message.
+   */
+  set context(value) {
+    if (this.#context !== undefined) {
+      throw new Error(
+        `Message ${this.#id} context already set; it is immutable after first assignment.`
+      )
+    }
+    this.#context = value
   }
 
   append(content) {

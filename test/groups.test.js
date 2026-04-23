@@ -1,5 +1,5 @@
-import { jest } from '@jest/globals'
-import API from '../api.js'
+import { vi } from 'vitest'
+import API from '../src/api.js'
 import Groups from '../src/groups.js'
 
 const config = {
@@ -13,7 +13,7 @@ describe('Groups', () => {
   it("should add group to configuration and emit 'created' event", () => {
     const api = new API(config, loglevel)
     const groups = new Groups(api)
-    const mockEmit = jest.spyOn(groups, 'emit')
+    const mockEmit = vi.spyOn(groups, 'emit')
     const groupName = 'group1'
     const members = ['agent1', 'agent2', 'agent3']
 
@@ -29,7 +29,7 @@ describe('Groups', () => {
     const initialMembers = ['agent1', 'agent2']
     const api = new API({ ...config, groups: { group1: initialMembers } }, loglevel)
     const groups = new Groups(api)
-    const mockEmit = jest.spyOn(groups, 'emit')
+    const mockEmit = vi.spyOn(groups, 'emit')
     const groupName = 'group1'
     const newMembers = ['agent3', 'agent4']
     api.config.groups[groupName] = initialMembers
@@ -45,7 +45,7 @@ describe('Groups', () => {
   it("should remove group from configuration and emit 'removed' event", () => {
     const api = new API(config, loglevel)
     const groups = new Groups(api)
-    const mockEmit = jest.spyOn(groups, 'emit')
+    const mockEmit = vi.spyOn(groups, 'emit')
     const groupName = 'group1'
     api.config.groups[groupName] = ['agent1', 'agent2']
 
@@ -88,7 +88,7 @@ describe('Groups', () => {
     const api = new API(config, loglevel)
     const groups = new Groups(api)
     const agentName = 'agent1'
-    api.agents.get = jest.fn().mockReturnValue(true)
+    api.agents.get = vi.fn().mockReturnValue(true)
 
     expect(() => {
       groups.add(agentName, 'agent2', 'agent3')

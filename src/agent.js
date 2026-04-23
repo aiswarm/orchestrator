@@ -5,11 +5,12 @@
  * @property {string} [description] The description of the agent.
  * @property {string[]} [skills=[]] The skills assigned to the assistant.
  * @property {string[]} [groups] The groups this agent belongs to.
+ * @property {string[]} [contexts=[]] Names of registered context providers that enrich messages to this agent (see doc/context-provider-contract.md). Per-provider options live under the global `contexts.{name}` config section, not on the agent.
  * @property {boolean} [entrypoint=false] Whether this agent is an entry point or not.
  * @property {DriverConfig} driver The driver to use for this agent.
  */
 
-import Message from '../message.js'
+import Message from './message.js'
 import Communications from './comms.js'
 
 /**
@@ -35,6 +36,7 @@ export default class Agent {
     this.#config = config
     this.#config.skills ??= []
     this.#expandSkillCollections(config)
+    this.#api.contextProviders.validateAgentContexts(name, config.contexts)
     this.#driver = index.getAgentDriver(name, config)
     if (this.#driver.instruct) {
       index.api.comms.on(name, async message => {
@@ -44,7 +46,18 @@ export default class Agent {
         ) {
           return // We get duplicate messages if we're part of the group and sending a message there. To prevent this, we just ignore messages that we send to the group, since they're already on the sender thread.
         }
+        const context = await this.#api.contextProviders.enrich({
+          agent: this,
+          incomingMessage: message
+        })
+        if (context !== undefined) {
+          message.context = context
+          this.#api.emit('contextReady', { agent: this, message })
+        }
         const response = await this.#driver.instruct(message)
+        const contextMetadata = context
+          ? context.entries.map(e => ({ name: e.name, metadata: e.metadata, error: e.error }))
+          : undefined
         if (response) {
           if (response instanceof Communications.Message) {
             response.status = Message.state.processed
@@ -53,6 +66,11 @@ export default class Agent {
             index.api.comms.emit(message.source, name, response)
           }
         }
+        this.#api.emit('agentTurnCompleted', {
+          agent: this,
+          finalMessage: response,
+          contextMetadata
+        })
       })
     }
     this.#interval = setInterval(() => {
@@ -81,6 +99,14 @@ export default class Agent {
 
   get groups() {
     return this.#config.groups ?? []
+  }
+
+  /**
+   * Convenience accessor exposing this agent's communications history.
+   * @return {History}
+   */
+  get history() {
+    return this.#api.comms.history
   }
 
   get status() {

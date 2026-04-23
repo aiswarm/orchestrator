@@ -72,6 +72,9 @@ const config = {
       interval: 5000
     }
   },
+  contexts: {
+    static: {}
+  },
   agents: {},
   groups: {}
 }

@@ -1,5 +1,5 @@
 import On from 'onall'
-import Message from '../message.js'
+import Message from './message.js'
 import History from './history.js'
 
 /**

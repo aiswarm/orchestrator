@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import Agent from '../src/agent.js'
 
 describe('Agent', () => {
@@ -9,12 +9,12 @@ describe('Agent', () => {
 
   beforeEach(() => {
     mockDriver = {
-      instruct: jest.fn().mockResolvedValue('instruction result')
+      instruct: vi.fn().mockResolvedValue('instruction result')
     }
     mockApi = {
       comms: {
-        on: jest.fn(),
-        emit: jest.fn()
+        on: vi.fn(),
+        emit: vi.fn()
       }
     }
     mockConfig = {
@@ -26,7 +26,7 @@ describe('Agent', () => {
       driver: mockDriver
     }
     agent = new Agent(mockApi, 'testAgent', mockConfig, mockDriver)
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('constructor', () => {

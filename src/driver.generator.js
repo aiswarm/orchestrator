@@ -1,4 +1,4 @@
-import AgentDriver from '../agentDriver.js'
+import AgentDriver from './agentDriver.js'
 
 /**
  * @typedef {Object} GeneratorConfig

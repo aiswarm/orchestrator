@@ -1,5 +1,5 @@
 import path from 'path'
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import {
   applyDrivers,
   applyGlobalConfig,
@@ -22,7 +22,7 @@ const log = {
 
 describe('configParser.js', () => {
   afterEach(() => {
-    jest.resetAllMocks()
+    vi.resetAllMocks()
   })
 
   describe('happy path', () => {

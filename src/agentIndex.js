@@ -1,7 +1,7 @@
 import Agent from './agent.js'
 
-/** @typedef {typeof import('../agentDriver.js').default} AgentDriverClass */
-/** @typedef {typeof import('../agentSkill.js').default} AgentSkillClass */
+/** @typedef {typeof import('./agentDriver.js').default} AgentDriverClass */
+/** @typedef {typeof import('./agentSkill.js').default} AgentSkillClass */
 
 export default class AgentIndex {
   /** @type {API} */

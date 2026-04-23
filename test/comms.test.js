@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import Communications from '../src/comms.js'
 
 describe('Communications', () => {
@@ -17,7 +17,7 @@ describe('Communications', () => {
       },
       running: true,
       groups: {
-        get: jest.fn()
+        get: vi.fn()
       }
     }
     comms = new Communications(api)

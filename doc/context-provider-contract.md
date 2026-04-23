@@ -35,6 +35,17 @@ A plugin registers a context provider during its `initialize(api)` call:
 
 ```js
 // rag plugin's index.js
+import ContextProvider from '@aiswarm/orchestrator/contextProvider.js'
+
+class RagProvider extends ContextProvider {
+  get name() {
+    return 'rag'
+  }
+  async contribute() {
+    return { systemContext: '…' }
+  }
+}
+
 export function initialize(api, config) {
   api.registerContextProvider(new RagProvider(api, config))
 }
@@ -43,10 +54,12 @@ export function initialize(api, config) {
 The signature is:
 
 ```js
-api.registerContextProvider(providerObject)
+api.registerContextProvider(providerInstance)
 ```
 
-The kernel reads the registry key from `providerObject.name`. This matches the existing `api.registerAgentSkill(SkillClass)` pattern, where the kernel reads `SkillClass.name` rather than taking a separate name argument. The `api.registerAgentDriver(DriverClass)` call is being aligned to the same shape (D14): kernel reads `DriverClass.type` from a static field, no name argument. All three plugin-type registrations now follow the same one-source-of-truth principle.
+Provider classes MUST extend the abstract `ContextProvider` base class; the kernel rejects instances that do not. The base class is the single source of truth for the contract — see [contextProvider.js](../src/contextProvider.js).
+
+The kernel reads the registry key from `provider.name` (an instance getter the subclass overrides). This matches the existing `api.registerAgentSkill(SkillClass)` pattern, where the kernel reads `instance.name` rather than taking a separate name argument. The `api.registerAgentDriver(DriverClass)` call uses `DriverClass.type` (static, since drivers are registered as classes). All three plugin-type registrations follow the same one-source-of-truth principle.
 
 Name collisions are a load-time error.
 
@@ -57,17 +70,15 @@ api.contextProviders.get('rag') // returns the same providerObject
 api.contextProviders.list() // returns array of { name, dependsOn }
 ```
 
-The kernel-facing properties on `providerObject`:
+The kernel-facing members on a `ContextProvider` subclass:
 
-| Property                     | Required? | Type             | Purpose                                                                                                                                      |
+| Member                       | Required? | Type             | Purpose                                                                                                                                      |
 | ---------------------------- | --------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                       | required  | `string`         | Lower-kebab-case identifier (per D13). Used as the registry key, in agent config, in logs, in contributions, and in dependency declarations. |
-| `dependsOn`                  | optional  | `string[]`       | Names of providers that must run before this one. Default `[]`.                                                                              |
+| `get name()`                 | required  | `string`         | Lower-kebab-case identifier (per D13). Used as the registry key, in agent config, in logs, in contributions, and in dependency declarations. |
+| `get dependsOn()`            | optional  | `string[]`       | Names of providers that must run before this one. Base class default: `[]`.                                                                  |
 | `contribute(contextRequest)` | required  | `async function` | Called by the kernel once per turn. See §4.                                                                                                  |
-| `start()`                    | optional  | `async function` | One-time setup (open DB connection, warm a vector store). Awaited at plugin init.                                                            |
-| `stop()`                     | optional  | `async function` | One-time teardown. Awaited at orchestrator shutdown.                                                                                         |
 
-Anything else on `providerObject` is the plugin's public API for other plugins to call (see §6). Going from a contribution back to its provider object is `api.contextProviders.get(name)`; going from a provider object to its name is `provider.name`.
+Anything else on the subclass is the plugin's public API for other plugins to call (see §6). Going from a contribution back to its provider instance is `api.contextProviders.get(name)`; going from a provider instance to its name is `provider.name`.
 
 ### 2.1 Validation
 
@@ -75,10 +86,10 @@ The kernel validates context providers at registration time via `assertValidCont
 
 Checks performed:
 
-- `provider` is a non-null object.
-- `typeof provider.name === 'string'` and non-empty, matching `/^[a-z][a-z0-9-]*$/`.
-- `provider.dependsOn`, if present, is an array of non-empty strings.
-- `typeof provider.contribute === 'function'`.
+- `provider instanceof ContextProvider` (subclass requirement).
+- `provider.name` is a non-empty string matching `/^[a-z][a-z0-9-]*$/` (the abstract getter throws if not overridden).
+- `provider.dependsOn` is an array of non-empty strings (base default `[]` satisfies this).
+- `provider.contribute` overrides the abstract base method.
 - `provider.name` does not collide with an already-registered context provider.
 
 Cycle detection on `dependsOn` is performed when the kernel computes the topological execution order (not at registration time, since later registrations may complete a cycle).
@@ -94,7 +105,7 @@ Context providers are inert until an agent's config opts in by name (D12, D13):
   agents: {
     Researcher: {
       driver: { type: 'anthropic', model: 'claude-sonnet-4-5' },
-      context: ['rag', 'memory'],
+      contexts: ['rag', 'memory'],
       // ...
     },
     QuickReplyBot: {
@@ -109,7 +120,7 @@ Config-resolution rules:
 
 - An agent with **no `context`** key gets no enrichment. `message.context` is `undefined` for its turns.
 - Names listed in `context` that are not registered are a **load-time error** with a clear message ("agent 'Researcher' lists context provider 'memory' but no such provider is registered — did you install `@aiswarm/context-memory`?"). Optional dependencies belong in code (`api.contextProviders.get('rag')?.…`), not in config typos.
-- Order in `context: [...]` is a **tiebreaker** for the dependency graph (§4.3), not the primary execution order.
+- Order in `contexts: [...]` is a **tiebreaker** for the dependency graph (§4.3), not the primary execution order.
 - A `global.context` and `group.context` may be added later as a convenience for fleet-wide defaults; for v1, configure per agent.
 
 ---
@@ -121,12 +132,12 @@ Config-resolution rules:
 ```
 message arrives on comms for agent A
   ↓
-kernel resolves A's context: [...] list to a set of providers
+kernel resolves A's contexts: [...] list to a set of providers
   ↓
 kernel computes dependency layers (topological sort)
   ↓
 for each layer L:
-  parallel: await all providers in L (each calls contribute(c))
+  parallel: await all providers in L (each returns a Contribution or undefined)
   ↓
 kernel assembles message.context = { entries: [...] in deterministic order }
   ↓
@@ -145,18 +156,20 @@ Each provider's `contribute(ctx)` receives:
 {
   ;(agent, // the Agent instance
     incomingMessage, // the Message about to be delivered to the driver
-    recentHistory, // bounded snapshot of the agent's recent comms history (read-only)
-    tools, // the resolved tool catalog for this agent (read-only)
-    contributions, // Map<string, Contribution> — what providers in earlier layers contributed
-    contribute(c)) // call zero or one time to record this provider's contribution
+    contributions) // Map<string, Contribution> — what providers in earlier layers contributed
 }
+```
+
+The handler returns a `Contribution` object (recorded as this provider's entry) or `undefined` (no entry).
+
 ```
 
 Contract notes:
 
 - `contributions` is **read-only** to the handler. It contains entries from all providers in _strictly earlier_ layers — never from peers in the same layer (which are running in parallel and may not have finished). This is what makes parallel-within-layer safe.
 - `contributions` is keyed by provider **name** (string). Going from a contribution back to its provider object is `api.contextProviders.get(name)`; going from a provider object to its name is `provider.name`.
-- `contribute()` is the only way to record output. Calling it more than once is a programming error and the kernel logs a warning and ignores all but the first call. Not calling it at all is fine — the provider just doesn't appear in `entries`.
+- Returning a `Contribution` object records this provider's entry. Returning `undefined` (or nothing) means "no contribution this turn" — the provider is omitted from `entries`.
+- The kernel light-validates the result: it must be a plain object, and the known keys (`systemContext: string`, `userContext: array`, `metadata: plain object`) must have the right type. Unknown keys pass through unchanged. Any contract violation is treated as if `contribute()` had thrown — see §5.
 - A provider that throws from `contribute()` is handled per §5.
 
 ### 4.3 Dependency graph and ordering
@@ -169,37 +182,39 @@ For one turn:
 4. Compute topological layers. Layer 0 = nodes with no in-edges to others in the set; layer N+1 = nodes whose deps are all satisfied by layers 0..N.
 5. Within a layer, execution order is undefined and parallel.
 6. Across layers, execution is sequential — layer N+1 starts only after every provider in layer N has resolved (or failed per §5).
-7. **Deterministic `entries` order**: providers are sorted by (layer asc, index in agent's `context: [...]` asc). This makes the prompt the LLM sees stable across runs.
+7. **Deterministic `entries` order**: providers are sorted by (layer asc, index in agent's `contexts: [...]` asc). This makes the prompt the LLM sees stable across runs.
 
 Worked example from PLAN's multi-layer memory case:
 
 ```
-Registered providers:  rag (deps=[]), memory (deps=['rag']), workspace (deps=[])
-Agent config:          context: ['rag', 'memory', 'workspace']
+
+Registered providers: rag (deps=[]), memory (deps=['rag']), workspace (deps=[])
+Agent config: contexts: ['rag', 'memory', 'workspace']
 
 Graph:
-  rag       → memory
-  workspace (independent)
+rag → memory
+workspace (independent)
 
 Layers:
-  L0: rag, workspace      (parallel)
-  L1: memory              (after L0 finishes)
+L0: rag, workspace (parallel)
+L1: memory (after L0 finishes)
 
 Execution:
-  t=0 ms      rag.contribute() and workspace.contribute() start in parallel
-  t=120 ms    workspace finishes (cheap fs scan)
-  t=400 ms    rag finishes (vector query + rerank)
-  t=400 ms    memory.contribute() starts; sees contributions Map with 'rag' and 'workspace'
-  t=520 ms    memory finishes
-  → message.context.entries = [rag, workspace, memory]   (L0 in config order, then L1)
-```
+t=0 ms rag.contribute() and workspace.contribute() start in parallel
+t=120 ms workspace finishes (cheap fs scan)
+t=400 ms rag finishes (vector query + rerank)
+t=400 ms memory.contribute() starts; sees contributions Map with 'rag' and 'workspace'
+t=520 ms memory finishes
+→ message.context.entries = [rag, workspace, memory] (L0 in config order, then L1)
+
+````
 
 ### 4.4 Optional vs hard dependencies
 
 `dependsOn` is **advisory ordering**. It expresses "if this other provider is going to run, run it first." It does NOT mean "this other provider must exist."
 
 - If a dependency is not registered at all, the kernel logs `info` ("provider 'memory' depends on 'rag' which is not registered — running without it") and runs the dependent provider anyway. The dependent provider sees no entry for the missing dep in `contributions` and decides what to do (often: gracefully degrade).
-- If a dependency is registered but the _agent_ didn't opt into it (not in the agent's `context: [...]`), same behavior — no edge is drawn for that turn, the dependent runs without seeing it.
+- If a dependency is registered but the _agent_ didn't opt into it (not in the agent's `contexts: [...]`), same behavior — no edge is drawn for that turn, the dependent runs without seeing it.
 - Hard dependencies belong in `package.json#peerDependencies`. npm warns the user at install time that `@aiswarm/context-memory` requires `@aiswarm/context-rag`. The kernel does not duplicate this signal.
 
 ```js
@@ -212,7 +227,7 @@ Execution:
     "@aiswarm/context-rag": { "optional": true }
   }
 }
-```
+````
 
 ---
 
@@ -245,7 +260,7 @@ The pattern is: **the registry is the handle.**
 
 ```js
 // memory plugin
-async contribute({ incomingMessage, contributions, contribute }) {
+async contribute({ incomingMessage, contributions }) {
   const rag = api.contextProviders.get('rag')
   const ragSources = contributions.get('rag')?.metadata?.sources ?? []
 
@@ -255,10 +270,10 @@ async contribute({ incomingMessage, contributions, contribute }) {
     : []
 
   const episodic = await this.#recall(incomingMessage)
-  contribute({
-    systemAdditions: render(episodic, extra),
+  return {
+    systemContext: render(episodic, extra),
     metadata: { sources: extra.map(e => e.path), episodicHits: episodic.length }
-  })
+  }
 }
 ```
 
@@ -274,9 +289,9 @@ Rules:
 
 ```js
 {
-  systemAdditions?: string,                 // text the driver adds to the system prompt
-  messageAdditions?: MessagePart[],         // multimodal parts (Q5; falls back to text-only until landed)
-  metadata?: object                         // free-form, opaque to the kernel and driver, visible to other providers
+  systemContext?: string,                 // text the driver prepends to the system prompt
+  userContext?: string,                   // text the driver prepends to the user message
+  metadata?: object                       // free-form, opaque to the kernel and driver, visible to other providers
 }
 ```
 
@@ -290,8 +305,7 @@ Conventions for `metadata`:
 
 ## 8. Lifecycle and concurrency
 
-- `start()` is awaited at plugin-init time. Use it for warm-up that's expensive but bounded (open SQLite, prepare statements, hydrate an LRU). Do not block forever.
-- `stop()` is awaited at orchestrator shutdown.
+- A provider that needs async warmup (open a DB connection, hydrate a cache) SHOULD perform it in its plugin's `initialize(api)` before calling `api.registerContextProvider(...)`. The plugin loader awaits each `initialize()`, so registration happens only after the provider is ready.
 - `contribute()` for a single agent is serialized — the kernel does not call it twice concurrently for the same agent. Across agents it MAY be called concurrently; provider implementations must be re-entrant or use their own locking.
 - Provider state that is per-agent SHOULD be keyed by `agent.name` inside the provider, since the same provider instance serves all agents that opted into it.
 
@@ -304,6 +318,39 @@ Context providers, like drivers, SHOULD avoid Node-only imports where feasible. 
 > Runs in: Node only — scans the local filesystem.
 
 No runtime check is required.
+
+---
+
+## 9.1 Built-in providers
+
+The orchestrator ships one provider out of the box, registered the same way as the built-in `generator` driver and the core skills (see [src/index.js](../src/index.js)):
+
+- **`static`** — injects a single, globally-configured contribution into every agent that opts in. Configured under the global `contexts.static` section using the {@link Contribution} field names directly (`systemContext`, `userContext`, `metadata`); agents only carry the opt-in name in their `contexts` array:
+
+  ```js
+  contexts: {
+    static: {
+      systemContext: 'You are part of an autonomous agent swarm.',
+      userContext: 'Mission: refactor auth.',
+      metadata: { tag: 'mission-control' }
+    }
+  }
+
+  // Per agent (just the opt-in):
+  agents: {
+    Researcher: { contexts: ['static'] }
+  }
+  ```
+
+  All three fields are optional; configure any subset. Validation runs once at provider-construction time (config snapshots, no runtime observation — same pattern as built-in skills/drivers). When the configured contribution is empty, the provider returns `undefined` and no entry is recorded.
+
+  When `text` is missing or empty the provider returns no contribution, so the entry simply doesn't appear in `message.context.entries`. More sophisticated providers (RAG, memory, workspace) are shipped as separate plugins.
+
+### Per-provider config
+
+Provider options live in the global config under `contexts.{providerName}`, mirroring how `skills.{name}` and `drivers.{type}` work. The provider is constructed with `{api}` and reads its own slice from `api.config.contexts[providerName]`. The agent's `AgentConfig` only carries the opt-in list (`contexts: [...]`), never per-provider options — this keeps the agent shape agnostic of which providers are installed.
+
+If a provider needs _per-agent_ variation (e.g. different text for two agents), users should register two named providers (e.g. `static-researcher`, `static-coder`) rather than push provider data into `AgentConfig`.
 
 ---
 
@@ -325,8 +372,8 @@ A bare-minimum provider for testing is just an object literal:
 api.registerContextProvider({
   name: 'echo',
   dependsOn: [],
-  async contribute({ incomingMessage, contribute }) {
-    contribute({ systemAdditions: `(echo: last user message was "${incomingMessage.content}")` })
+  async contribute({ incomingMessage }) {
+    return { systemContext: `(echo: last user message was "${incomingMessage.content}")` }
   }
 })
 ```

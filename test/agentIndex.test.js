@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import AgentIndex from '../src/agentIndex.js'
 import Agent from '../src/agent.js'
 
@@ -26,9 +26,9 @@ describe('AgentIndex', () => {
   beforeEach(() => {
     api = {
       comms: {
-        on: jest.fn(),
-        emit: jest.fn(),
-        createMessage: jest.fn()
+        on: vi.fn(),
+        emit: vi.fn(),
+        createMessage: vi.fn()
       },
       config: {
         agents: {
@@ -41,16 +41,16 @@ describe('AgentIndex', () => {
         }
       },
       log: {
-        info: jest.fn(),
-        error: jest.fn(),
-        trace: jest.fn()
+        info: vi.fn(),
+        error: vi.fn(),
+        trace: vi.fn()
       },
-      on: jest.fn(),
+      on: vi.fn(),
       groups: {
-        get: jest.fn()
+        get: vi.fn()
       },
-      pause: jest.fn(),
-      resume: jest.fn()
+      pause: vi.fn(),
+      resume: vi.fn()
     }
     agentIndex = new AgentIndex(api)
     agentIndex.registerDriver(Driver)

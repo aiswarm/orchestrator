@@ -1,4 +1,4 @@
-import AgentSkill from '../../agentSkill.js'
+import AgentSkill from '../agentSkill.js'
 
 export default class TimeAndDateSkill extends AgentSkill {
   // eslint-disable-next-line no-unused-private-class-members -- kept for future use; other skills read api during execute

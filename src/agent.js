@@ -63,7 +63,10 @@ export default class Agent {
             response.status = Message.state.processed
             index.api.comms.emit(response)
           } else if (response.trim().length) {
-            index.api.comms.emit(message.source, name, response)
+            const replyTarget = this.#api.groups.get(message.target)
+              ? message.target
+              : message.source
+            index.api.comms.emit(replyTarget, name, response)
           }
         }
         this.#api.emit('agentTurnCompleted', {

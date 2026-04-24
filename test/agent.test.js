@@ -31,6 +31,9 @@ describe('Agent', () => {
         validateAgentContexts: vi.fn(),
         enrich: vi.fn().mockResolvedValue(undefined)
       },
+      groups: {
+        get: vi.fn().mockReturnValue(undefined)
+      },
       emit: vi.fn()
     }
     mockIndex = {
@@ -97,6 +100,25 @@ describe('Agent', () => {
       const message = { source: 'user', target: 'testAgent', type: 'string', content: 'hi' }
       const handler = messageHandlers['testAgent']
       await expect(handler(message)).rejects.toThrow(error)
+    })
+
+    it('should reply directly to the sender when the message was a direct message', async () => {
+      const message = { source: 'user', target: 'testAgent', type: 'string', content: 'hi' }
+      mockDriver.instruct.mockResolvedValueOnce('hello back')
+      const handler = messageHandlers['testAgent']
+      await handler(message)
+      expect(mockApi.comms.emit).toHaveBeenCalledWith('user', 'testAgent', 'hello back')
+    })
+
+    it('should reply to the group when the original message was addressed to a group', async () => {
+      mockApi.groups.get.mockImplementation(name =>
+        name === 'team1' ? ['testAgent', 'user'] : undefined
+      )
+      const message = { source: 'user', target: 'team1', type: 'string', content: 'hi team' }
+      mockDriver.instruct.mockResolvedValueOnce('hello team')
+      const handler = messageHandlers['testAgent']
+      await handler(message)
+      expect(mockApi.comms.emit).toHaveBeenCalledWith('team1', 'testAgent', 'hello team')
     })
   })
 })

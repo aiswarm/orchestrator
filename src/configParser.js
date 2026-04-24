@@ -263,33 +263,50 @@ export function applyDrivers(config) {
  * This method first looks for the group property on the config object and applies the group configuration to map agents.
  * Then it scans each agent and adds the agent to the group specified in the agent's configuration. Finally, if there are
  * very similar named groups, it will warn the user that they should be merged.
+ *
+ * Group names and member references are normalized to trimmed-lowercase here
+ * so the rest of the system can rely on the same invariant that
+ * {@link Groups#add} enforces at runtime.
  * @param {Config} config
  */
 export function applyGroups(config) {
   if (config.groups) {
-    for (let groupName in config.groups) {
-      let group = config.groups[groupName]
-      for (let agentName in config.agents) {
-        let agent = config.agents[agentName]
+    const normalized = {}
+    for (const groupName in config.groups) {
+      const key = groupName.trim().toLowerCase()
+      const members = (config.groups[groupName] || []).map(m =>
+        typeof m === 'string' ? m.trim().toLowerCase() : m
+      )
+      // Merge if multiple raw keys collapse to the same normalized name.
+      normalized[key] = normalized[key] ? [...new Set([...normalized[key], ...members])] : members
+    }
+    config.groups = normalized
+
+    for (const groupName in config.groups) {
+      const group = config.groups[groupName]
+      for (const agentName in config.agents) {
+        const agent = config.agents[agentName]
         if (!agent.groups) {
           agent.groups = []
         }
-        if (group.includes(agentName)) {
+        if (group.includes(agentName.trim().toLowerCase())) {
           agent.groups.push(groupName)
         }
       }
     }
   }
 
-  for (let agentName in config.agents) {
-    let agent = config.agents[agentName]
+  for (const agentName in config.agents) {
+    const agent = config.agents[agentName]
     if (agent.groups) {
-      for (let group of agent.groups) {
+      const lowerAgent = agentName.trim().toLowerCase()
+      agent.groups = agent.groups.map(g => g.trim().toLowerCase())
+      for (const group of agent.groups) {
         if (!config.groups[group]) {
           config.groups[group] = []
         }
-        if (!config.groups[group].includes(agentName)) {
-          config.groups[group].push(agentName)
+        if (!config.groups[group].includes(lowerAgent)) {
+          config.groups[group].push(lowerAgent)
         }
       }
     }

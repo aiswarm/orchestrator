@@ -63,12 +63,16 @@ export default class Groups extends On {
 
   /**
    * Creates a group with the given name and members if it does not already exist.
-   * Guarantees consistent group names by sorting the members alphabetically.
+   * Guarantees consistent group names by lowercasing each member, sorting them
+   * alphabetically, and joining with ', '. The lowercasing here matches what
+   * {@link add} does internally so the auto-name is stable regardless of the
+   * casing the caller used.
    * @param {string} names
    */
   auto(...names) {
-    const groupName = names.sort().join(', ')
-    this.add(groupName, ...names)
+    const normalized = [...new Set(names.map(n => n.trim().toLowerCase()))].sort()
+    const groupName = normalized.join(', ')
+    this.add(groupName, ...normalized)
   }
 
   /**
@@ -84,14 +88,20 @@ export default class Groups extends On {
   }
 
   /**
-   * Returns the group names of a given agent.
+   * Returns the group names of a given agent. Agent and group names are
+   * normalized to lowercase on entry (see {@link add}, AgentIndex), so the
+   * lookup must lowercase the input too.
    * @param {string} name
    * @return {string[]} An array of group names.
    */
   forAgent(name) {
+    if (!name || typeof name !== 'string') {
+      return []
+    }
+    const needle = name.trim().toLowerCase()
     return Object.entries(this.#api.config.groups)
-      .filter(([, members]) => members.includes(name))
-      .map(([name]) => name)
+      .filter(([, members]) => members.includes(needle))
+      .map(([groupName]) => groupName)
   }
 
   /**

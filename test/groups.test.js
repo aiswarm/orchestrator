@@ -104,4 +104,47 @@ describe('Groups', () => {
     expect(result).toBe(true)
     expect(api.config.groups[groupName]).toEqual([])
   })
+
+  // Mixed-case lookups must succeed because add() lowercases on entry.
+  it('forAgent should find groups regardless of input casing', () => {
+    const api = makeApi({ team1: ['alice', 'bob'], team2: ['bob', 'carol'] })
+    const groups = new Groups(api)
+
+    expect(groups.forAgent('Bob').sort()).toEqual(['team1', 'team2'])
+    expect(groups.forAgent('  ALICE  ')).toEqual(['team1'])
+    expect(groups.forAgent('nobody')).toEqual([])
+    expect(groups.forAgent(undefined)).toEqual([])
+  })
+
+  // get() already lowercases; verify it works end-to-end with mixed case.
+  it('get should return members regardless of input casing', () => {
+    const members = ['agent1', 'agent2']
+    const api = makeApi({ team1: members })
+    const groups = new Groups(api)
+
+    expect(groups.get('Team1')).toEqual(members)
+    expect(groups.get('  TEAM1  ')).toEqual(members)
+  })
+
+  // auto() should produce a stable, lowercased group name.
+  it('auto should normalize members and produce a stable lowercase group name', () => {
+    const api = makeApi()
+    const groups = new Groups(api)
+    const mockEmit = vi.spyOn(groups, 'emit')
+
+    groups.auto('Bob', 'ALICE', '  carol  ')
+
+    expect(api.config.groups['alice, bob, carol']).toEqual(['alice', 'bob', 'carol'])
+    expect(mockEmit).toHaveBeenCalledWith('created', 'alice, bob, carol', ['alice', 'bob', 'carol'])
+  })
+
+  // auto() should dedupe members that collapse to the same lowercase name.
+  it('auto should dedupe members that collapse to the same name', () => {
+    const api = makeApi()
+    const groups = new Groups(api)
+
+    groups.auto('Bob', 'bob', '  BOB  ', 'alice')
+
+    expect(api.config.groups['alice, bob']).toEqual(['alice', 'bob'])
+  })
 })

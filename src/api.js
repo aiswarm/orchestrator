@@ -272,3 +272,11 @@ let singleton = null
 export default function getApi(config, log) {
   return singleton || (singleton = new API(config, log))
 }
+
+/**
+ * Named export of the {@link API} class. Use this when you need a fresh
+ * instance — e.g. unit tests that must isolate state across cases. The
+ * default export ({@link getApi}) returns a process-wide singleton, which
+ * is what application code should use.
+ */
+export { API }

@@ -42,13 +42,20 @@ describe('AgentIndex', () => {
       },
       log: {
         info: vi.fn(),
+        debug: vi.fn(),
         error: vi.fn(),
-        trace: vi.fn()
+        trace: vi.fn(),
+        warn: vi.fn()
       },
       on: vi.fn(),
       groups: {
         get: vi.fn()
       },
+      contextProviders: {
+        validateAgentContexts: vi.fn(),
+        enrich: vi.fn().mockResolvedValue(undefined)
+      },
+      emit: vi.fn(),
       pause: vi.fn(),
       resume: vi.fn()
     }

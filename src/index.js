@@ -6,7 +6,7 @@
  * be loaded and initialized automatically. For more information on plugins, see the documentation in the doc folder.
  */
 import log from 'loglevel'
-import API from './api.js'
+import getApi from './api.js'
 import Config from './configParser.js'
 import plugins from './plugins.js'
 import GeneratorDriver from './driver.generator.js'
@@ -23,7 +23,7 @@ export async function initialize(configPath, loglevel = 'info') {
   log.info('Starting AI Swarm Orchestrator')
 
   const config = await Config(configPath, loglevel)
-  let api = API(config, log)
+  let api = getApi(config, log)
 
   // Add built-in driver(s)
   api.registerAgentDriver(GeneratorDriver)

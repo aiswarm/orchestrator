@@ -41,13 +41,14 @@ export default class Groups extends On {
       members = members[0]
     }
     if (this.#api.config.groups[name]) {
-      this.#api.config.groups[name] = [...new Set([...this.#api.config.groups[name], ...members])]
+      const merged = [...new Set([...this.#api.config.groups[name], ...members])]
+      this.#api.config.groups[name] = merged
       /**
        * @event Groups#updated
        * @type {string} The name of the group.
-       * @type {String[]} The members of the group.
+       * @type {String[]} The members of the group (full merged list, not just the additions).
        */
-      this.emit('updated', name, members)
+      this.emit('updated', name, merged)
       return false
     }
     /**

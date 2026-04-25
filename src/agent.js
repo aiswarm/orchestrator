@@ -21,8 +21,6 @@ export default class Agent {
   #config
   #driver
   #api
-  #status = 'created'
-  #interval
 
   /**
    * Creates a new agent.
@@ -76,12 +74,9 @@ export default class Agent {
         })
       })
     }
-    this.#interval = setInterval(() => {
-      if (this.#status !== this.#driver.status) {
-        this.#status = this.#driver.status
-        this.#api.emit('agentUpdated', this)
-      }
-    }, 250)
+    if (typeof this.#driver.on === 'function') {
+      this.#driver.on('statusChanged', () => this.#api.emit('agentUpdated', this))
+    }
   }
 
   get name() {
@@ -112,13 +107,13 @@ export default class Agent {
     return this.#api.comms.history
   }
 
+  /**
+   * The driver is the single source of truth for status; this getter just
+   * delegates.
+   * @return {string}
+   */
   get status() {
-    return this.#status
-  }
-
-  set status(status) {
-    this.#status = status
-    this.#api.emit('agentUpdated', this)
+    return this.#driver.status
   }
 
   async instruct(prompt) {
@@ -138,7 +133,6 @@ export default class Agent {
   }
 
   remove() {
-    clearInterval(this.#interval)
     if (this.#driver.remove) {
       this.#driver.remove(this)
     }

@@ -54,14 +54,17 @@ export default class Skills extends On {
   }
 
   /**
-   * Executes a skill.
-   * @param {string} name The name of the skill to execute.
-   * @param {Object} args The arguments to pass to the skill.
-   * @param {string} agentName The name of the agent that called the skill.
+   * Executes a skill on behalf of an agent. The single options object keeps
+   * the call site self-describing and matches the skill-call shape used
+   * across the orchestrator.
+   * @param {Object} opts
+   * @param {string} opts.agentName Name of the agent on whose behalf the skill runs; used as the target of the bookkeeping `Message.type.skill` message.
+   * @param {string} opts.name The skill's registered name.
+   * @param {Object} [opts.args={}] Skill arguments.
    * @return {Promise<*>} The skill's result, forwarded to the calling driver. Must be JSON-serializable.
-   * @throws {Error} If the skill is not found or an error occurs during execution.
+   * @throws {Error} If the skill is not found or fails.
    */
-  async execute(name, args, agentName) {
+  async invoke({ agentName, name, args = {} }) {
     const skill = this.#skills[name]
     const message = this.#api.comms.createMessage(
       agentName,
@@ -79,7 +82,7 @@ export default class Skills extends On {
     }
     try {
       this.emit('skillStarted', agentName, name, args)
-      let result = await skill.execute(args, agentName)
+      const result = await skill.execute(args, agentName)
       this.emit('skillCompleted', agentName, name, result)
       message.status = Message.state.complete
       return result

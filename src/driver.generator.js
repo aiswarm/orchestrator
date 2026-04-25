@@ -32,6 +32,15 @@ export default class GeneratorDriver extends AgentDriver {
     )
     api.log.debug('Created Generator driver for agent', name)
     api.log.trace('Generator driver config:', this.#config)
+    this.status = 'idle'
+  }
+
+  /**
+   * The generator is a deterministic test double; it advertises no provider features.
+   * @return {{}}
+   */
+  get capabilities() {
+    return {}
   }
 
   instruct(message) {
@@ -46,6 +55,7 @@ export default class GeneratorDriver extends AgentDriver {
 
   pause() {
     clearInterval(this.#interval)
+    this.status = 'paused'
   }
 
   resume() {
@@ -65,5 +75,6 @@ export default class GeneratorDriver extends AgentDriver {
       this.#api.comms.emit(message)
       this.#api.log.info(message.toString())
     }, this.#config.interval || 5000)
+    this.status = 'idle'
   }
 }

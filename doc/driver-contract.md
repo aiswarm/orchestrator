@@ -157,7 +157,7 @@ A turn may produce **many** messages (streaming partials, tool-call traces, mult
 Tool calls are part of the agent loop and are mediated through `api.skills`. When the provider asks for a tool:
 
 1. Driver translates the provider's tool-call into `{ name, args }`.
-2. Driver calls `api.skills.invoke({ agent: this.#name, name, args })` — this routes to the right producer (skill, MCP server, or **this driver's own self-skills**, §9).
+2. Driver calls `api.skills.invoke({ agentName: this.#name, name, args })` — this routes to the right producer (skill, MCP server, or **this driver's own self-skills**, §9).
 3. Driver receives the tool result and feeds it back to the provider on the next turn.
 4. Driver SHOULD emit a `Message` of type `Message.type.skill` for both the call and the result so UIs/transports/loggers can show tool use uniformly across providers (Q11).
 
@@ -185,7 +185,7 @@ Throwing from `instruct()` is reserved for kernel-visible bugs (config invariant
 'error'    last instruct() failed; cleared on next successful turn
 ```
 
-The kernel currently polls `driver.status` every 250 ms (`agent.js`) and emits `agentUpdated` on change. Drivers SHOULD instead **emit `agentUpdated` themselves** when `status` changes, by setting it through their host `Agent` (the kernel will switch to event-driven status in the same change that lands this contract). Until then, exposing `status` as a getter that returns the current value is sufficient.
+The base `AgentDriver` extends `onall` and exposes `status` as a getter/setter pair. Drivers transition state by **assigning** to it (`this.status = 'busy'`); the setter dedupes equal writes and emits a `'statusChanged'` event. The host `Agent` subscribes to `'statusChanged'` once at construction time and re-emits `agentUpdated` on the api singleton — there is no longer a polling loop. This mirrors `Message.status`, which uses the same setter-with-event-emission pattern. Subclasses MAY override the getter for derived state, but MUST also override (or write through) the setter so subscribers see the transition.
 
 ---
 

@@ -121,4 +121,58 @@ describe('Agent', () => {
       expect(mockApi.comms.emit).toHaveBeenCalledWith('team1', 'testAgent', 'hello team')
     })
   })
+
+  describe('status propagation', () => {
+    it('should mirror the initial driver status', () => {
+      expect(agent.status).toBe('idle')
+    })
+
+    it('should update status and emit agentUpdated when the driver fires statusChanged', () => {
+      const driverHandlers = {}
+      const eventDriver = {
+        type: 'eventy',
+        status: 'created',
+        on: vi.fn((event, fn) => {
+          driverHandlers[event] = fn
+        }),
+        instruct: vi.fn(),
+        pause: vi.fn(),
+        resume: vi.fn()
+      }
+      mockIndex.getAgentDriver.mockReturnValueOnce(eventDriver)
+      const eventAgent = new Agent(mockIndex, 'eventAgent', mockConfig)
+      mockApi.emit.mockClear()
+
+      eventDriver.status = 'busy'
+      driverHandlers.statusChanged('busy')
+
+      expect(eventAgent.status).toBe('busy')
+      expect(mockApi.emit).toHaveBeenCalledWith('agentUpdated', eventAgent)
+    })
+
+    /*
+     * Dedupe is the driver's responsibility (see AgentDriver.set status).
+     * Agent simply forwards every statusChanged event it receives.
+     */
+    it('should re-emit agentUpdated for every statusChanged the driver fires', () => {
+      const driverHandlers = {}
+      const eventDriver = {
+        type: 'eventy',
+        status: 'idle',
+        on: vi.fn((event, fn) => {
+          driverHandlers[event] = fn
+        }),
+        instruct: vi.fn(),
+        pause: vi.fn(),
+        resume: vi.fn()
+      }
+      mockIndex.getAgentDriver.mockReturnValueOnce(eventDriver)
+      const dup = new Agent(mockIndex, 'dup', mockConfig)
+      mockApi.emit.mockClear()
+
+      driverHandlers.statusChanged('idle')
+
+      expect(mockApi.emit).toHaveBeenCalledWith('agentUpdated', dup)
+    })
+  })
 })

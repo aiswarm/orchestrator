@@ -1,6 +1,6 @@
 /**
  * @typedef {Object} DriverConfig
- * @description Driver-specific configuration object. Plugin packages SHOULD extend this typedef
+ * @description Driver-specific configuration object. Plugin packages may extend this typedef
  *   with their own provider-specific fields (model, apiKey, baseUrl, …).
  * @property {string} type The driver's unique type identifier (matches `static type` on the driver class).
  */
@@ -9,41 +9,54 @@
  * @typedef {Object} AgentDriverOptions
  * @description Constructor argument shape for any class extending {@link AgentDriver}. The kernel
  *   builds this object in {@link AgentIndex#getAgentDriver} and hands it to the driver class.
- *   Drivers SHOULD destructure named fields rather than store the whole options object.
  * @property {API} api The orchestrator singleton. Use `api.log`, `api.skills`, `api.comms`, `api.emit`, `api.on`. Never `console`.
  * @property {AgentIndex} index The agent index. Use to look up sibling agents when coordination is needed.
- * @property {string} name The agent name this driver instance serves. Drivers SHOULD include this in every log line.
+ * @property {string} name The agent name this driver instance serves.
  * @property {AgentConfig} agentConfig The full agent configuration (instructions, description, skills, groups, driver).
- * @property {DriverConfig} driverConfig Convenience shortcut to `agentConfig.driver`. Plugin packages typically extend this typedef with their own provider fields.
+ * @property {DriverConfig} driverConfig Convenience shortcut to `agentConfig.driver`.
  */
 
+import On from 'onall'
+import { assertKebabCase } from './formatChecks.js'
+
 /**
- * Abstract base class for agent drivers.
+ * Abstract base class for agent drivers. Subclasses declare a `static type`
+ * (lower-kebab-case, used as the registry key) and implement
+ * {@link AgentDriver#instruct}. The constructor enforces the `static type`
+ * contract so misconfigured subclasses fail at instantiation rather than at
+ * registration.
  *
- * Subclasses MUST declare a `static type` (lower-kebab-case, used as the
- * registry key) and implement {@link AgentDriver#instruct}. The constructor
- * enforces the `static type` contract so a subclass missing or misformatting
- * it throws at instantiation rather than at registration.
+ * Plugin classes must extend this base; `api.registerAgentDriver` rejects
+ * classes that do not. The base extends {@link On} so subclasses can emit
+ * driver-local events and the kernel can subscribe without polling.
  *
- * Plugin classes MUST extend this base. `api.registerAgentDriver` rejects
- * classes that do not, so the kernel can rely on the base-class invariants.
+ * ## Events emitted on this object
+ *
+ * Subscribe with `driver.on(event, handler)`.
+ *
+ * | Event           | Payload              | Emitted from                  | When |
+ * |-----------------|----------------------|-------------------------------|------|
+ * | `statusChanged` | `(status)` `string`  | {@link AgentDriver#status} setter | Driver lifecycle transitioned to a new status (`'idle' | 'busy' | 'paused' | 'error'`, etc.). The previous value is not included; read `driver.status` after the event if needed. Suppressed when assigning the current value. |
+ *
+ * Subclasses may emit additional namespaced events (e.g. `'tool:*'`,
+ * `'stream:*'`); document them on the subclass.
  *
  * @abstract
  */
-import { assertKebabCase } from './formatChecks.js'
-
-export default class AgentDriver {
+export default class AgentDriver extends On {
   /**
    * Subclasses must override with a non-empty lower-kebab-case string.
    * @type {string?}
    */
   static type = null
 
+  #status = 'created'
+
   /**
-   * @throws {TypeError} If instantiated directly, or if the subclass is missing
-   *   a valid `static type`.
+   * @throws {TypeError} If instantiated directly, or if the subclass is missing a valid `static type`.
    */
   constructor() {
+    super()
     if (new.target === AgentDriver) {
       throw new TypeError('AgentDriver is abstract and cannot be instantiated directly.')
     }
@@ -57,7 +70,7 @@ export default class AgentDriver {
   }
 
   /**
-   * The driver's registry key. Reads from the subclass's `static type`.
+   * The driver's registry key, read from the subclass's `static type`.
    * @return {string}
    */
   get type() {
@@ -65,14 +78,42 @@ export default class AgentDriver {
   }
 
   /**
-   * Current driver state. Subclasses should override when they have richer
-   * lifecycle semantics. One of `'created' | 'idle' | 'busy' | 'paused' | 'error'`.
-   * Defaults to `'created'`: a freshly-constructed driver has not done any work
-   * yet. Subclasses transition to `'idle'` once they are ready to accept input.
+   * Current driver state. One of `'created' | 'idle' | 'busy' | 'paused' | 'error'`.
+   * Drivers transition by assigning to this property; the setter dedupes equal
+   * writes and emits `'statusChanged'` so subscribers (the host {@link Agent},
+   * UIs, transports) are notified without polling. Mirrors the
+   * getter/setter-with-event pattern used by {@link Message#status}.
    * @return {string}
    */
   get status() {
-    return 'created'
+    return this.#status
+  }
+
+  /**
+   * Assigning a new value transitions the driver and emits `'statusChanged'`.
+   * Writing the current value is a no-op.
+   * @param {string} status One of the values listed on {@link AgentDriver#status}.
+   * @fires AgentDriver#statusChanged
+   */
+  set status(status) {
+    if (status === this.#status) {
+      return
+    }
+    this.#status = status
+    this.emit('statusChanged', status)
+  }
+
+  /**
+   * Driver capability advertisement. Consumers (UIs, transports, other
+   * drivers) read this to enable or hide features. Missing fields default to
+   * `false`. Subclasses should override with the truth as they know it.
+   *
+   * The kernel does not gate calls on capabilities — a driver that lacks
+   * `images` should reject an image-bearing message itself with a clear error.
+   * @return {{streaming?: boolean, tools?: boolean, images?: boolean, audio?: boolean, reasoning?: boolean, cache?: boolean, parallelTools?: boolean}}
+   */
+  get capabilities() {
+    return {}
   }
 
   /**
@@ -81,7 +122,6 @@ export default class AgentDriver {
    * @param {Message} _message
    * @return {Promise<void>}
    */
-
   async instruct(_message) {
     throw new Error(`${this.constructor.name}.instruct() is not implemented.`)
   }

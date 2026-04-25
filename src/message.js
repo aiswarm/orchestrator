@@ -156,9 +156,21 @@ export default class Message {
     this.#context = value
   }
 
+  /**
+   * Append a chunk to the message content. Emits `messageAppended` (with the
+   * delta) only — `messageUpdated` is reserved for status/metadata changes.
+   * Subscribers that want to render incremental output listen to
+   * `messageAppended`; those that only care about lifecycle stay on
+   * `messageUpdated`.
+   * @param {string} content The text chunk to append.
+   * @fires API#messageAppended
+   */
   append(content) {
+    if (!content) {
+      return
+    }
     this.#content += content
-    this.#api.emit('messageUpdated', this)
+    this.#api.emit('messageAppended', this, content)
   }
 
   /**
